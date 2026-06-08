@@ -430,6 +430,7 @@ export default function AnalysePage() {
   const [insufficientDataError, setInsufficientDataError] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   const [showAllDetails, setShowAllDetails] = useState(false);
+  const [tmi, setTmi] = useState(30);
   const [openTooltip, setOpenTooltip] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState('');
   const [marketRent, setMarketRent] = useState<MarketRent>({
@@ -1213,6 +1214,66 @@ export default function AnalysePage() {
           </div>
         )}
 
+        {result && (() => {
+          const socialRate = 0.172;
+          const taxRate = tmi / 100 + socialRate;
+          const annual = result.annualRent;
+          const foncierTax = annual * 0.70 * taxRate;
+          const bicTax = annual * 0.50 * taxRate;
+          const foncierNet = result.realCashflow - foncierTax / 12;
+          const bicNet = result.realCashflow - bicTax / 12;
+          const bicIsBetter = bicNet > foncierNet;
+          const fmt = (v: number) => (v < 0 ? '- ' : '') + Math.abs(Math.round(v)).toLocaleString('fr-FR') + ' €';
+          return (
+            <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: '#ffffff', border: '1px solid rgba(226, 232, 240, 0.9)', boxShadow: '0 1px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Fiscal · TMI</div>
+                <div style={{ flex: 1, display: 'flex', padding: '3px', borderRadius: '8px', backgroundColor: '#f3f4f6', border: '1px solid #e5e7eb' }}>
+                  {[0, 11, 30, 41, 45].map((v) => (
+                    <button
+                      key={v}
+                      type="button"
+                      onClick={() => setTmi(v)}
+                      style={{
+                        flex: 1,
+                        padding: '6px 2px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        backgroundColor: tmi === v ? '#ffffff' : 'transparent',
+                        color: tmi === v ? '#111827' : '#6b7280',
+                        fontSize: '12px',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        boxShadow: tmi === v ? '0 1px 4px rgba(15, 23, 42, 0.10)' : 'none',
+                      }}
+                    >
+                      {v}%
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                {[
+                  { label: 'Nu · micro-foncier', net: foncierNet, tax: foncierTax, best: !bicIsBetter },
+                  { label: 'Meuble · micro-BIC', net: bicNet, tax: bicTax, best: bicIsBetter },
+                ].map(({ label, net, tax, best }) => (
+                  <div key={label} style={{ padding: '12px', borderRadius: '8px', backgroundColor: best ? '#f0fdf4' : '#f8fafc', border: `1px solid ${best ? '#86efac' : '#e2e8f0'}` }}>
+                    <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 700, marginBottom: '6px' }}>{label}</div>
+                    <div style={{ fontSize: '18px', fontWeight: 900, color: net >= 0 ? '#16a34a' : '#dc2626' }}>{fmt(net)}</div>
+                    <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 600, marginTop: '1px', marginBottom: '8px' }}>net/mois apres impots</div>
+                    <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 700 }}>Impot estime</div>
+                    <div style={{ fontSize: '13px', fontWeight: 800, color: '#475569' }}>{fmt(tax)}<span style={{ fontSize: '10px', fontWeight: 600 }}>/an</span></div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600 }}>
+                Calcul en regime micro — montant reel souvent inferieur grace aux deductions (interets, taxe fonciere, charges). Le LMNP au reel peut etre encore plus avantageux — consultez un comptable specialise.
+              </div>
+            </div>
+          );
+        })()}
+
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div style={cardStyle}>
             <div style={sectionTitleStyle}>Bien</div>
@@ -1838,7 +1899,7 @@ export default function AnalysePage() {
           maxWidth: '430px',
           zIndex: 30,
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1fr 1fr',
+          gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr',
           gap: '6px',
           padding: '7px',
           borderRadius: '20px',
@@ -1853,6 +1914,7 @@ export default function AnalysePage() {
           { href: '/offre', label: 'Offre', active: false, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></> },
           { href: '/copro', label: 'Copro', active: false, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></> },
           { href: '/mes-analyses', label: 'Historique', active: false, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></> },
+          { href: '/compte', label: 'Compte', active: false, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></> },
         ].map((item) => (
           <a
             key={item.label}

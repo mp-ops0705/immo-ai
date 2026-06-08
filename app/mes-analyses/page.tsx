@@ -44,6 +44,9 @@ type SavedAnalysis = {
   score: number | null;
   analysis_text: string | null;
   raw_result: RawResult;
+  share_token: string | null;
+  share_enabled: boolean;
+  shared_at: string | null;
 };
 
 const formatCurrency = (value: number | null | undefined) =>
@@ -65,6 +68,9 @@ export default function MesAnalysesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
   const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [sharingId, setSharingId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [tmi, setTmi] = useState(30);
 
   const loadAnalyses = async () => {
     setError('');
@@ -158,6 +164,38 @@ export default function MesAnalysesPage() {
       current?.id === analysis.id ? { ...current, title: nextTitle } : current
     );
     cancelRename();
+  };
+
+  const shareAnalysis = async (analysis: SavedAnalysis) => {
+    setSharingId(analysis.id);
+    try {
+      let token = analysis.share_token;
+      if (!token || !analysis.share_enabled) {
+        token = crypto.randomUUID();
+        const { error } = await supabase
+          .from('analyses')
+          .update({ share_token: token, share_enabled: true, shared_at: new Date().toISOString() })
+          .eq('id', analysis.id);
+        if (error) throw error;
+        setAnalyses((prev) =>
+          prev.map((a) => (a.id === analysis.id ? { ...a, share_token: token, share_enabled: true } : a))
+        );
+      }
+      const url = `${window.location.origin}/partage/${token}`;
+      const title = analysis.title || analysis.city || 'Analyse immobilière';
+      const nav = navigator as Navigator & { share?: (data: ShareData) => Promise<void> };
+      if (nav.share) {
+        await nav.share({ title, text: `Mon analyse immo.ai : ${title}`, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        setCopiedId(analysis.id);
+        setTimeout(() => setCopiedId((current) => (current === analysis.id ? null : current)), 2500);
+      }
+    } catch {
+      // user cancelled or clipboard unavailable
+    } finally {
+      setSharingId(null);
+    }
   };
 
   const cardStyle = {
@@ -312,58 +350,79 @@ export default function MesAnalysesPage() {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '12px' }}>
-                <button
-                  type="button"
-                  onClick={() => setSelectedAnalysis((current) => (current?.id === analysis.id ? null : analysis))}
-                  style={{
-                    padding: '10px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    backgroundColor: '#111827',
-                    color: '#ffffff',
-                    fontSize: '13px',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {selectedAnalysis?.id === analysis.id ? 'Masquer' : 'Voir'}
-                </button>
-                <Link
-                  href="/offre"
-                  style={{
-                    padding: '10px',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#111827',
-                    fontSize: '13px',
-                    fontWeight: 800,
-                    textAlign: 'center',
-                    textDecoration: 'none',
-                  }}
-                >
-                  Faire une offre
-                </Link>
-              </div>
-              <div style={{ marginTop: '8px' }}>
-                <button
-                  type="button"
-                  onClick={() => deleteAnalysis(analysis.id)}
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    borderRadius: '8px',
-                    border: '1px solid #fecaca',
-                    backgroundColor: '#fef2f2',
-                    color: '#b91c1c',
-                    fontSize: '13px',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                  }}
-                >
-                  Supprimer
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedAnalysis((current) => (current?.id === analysis.id ? null : analysis))}
+                style={{
+                  padding: '10px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  backgroundColor: '#111827',
+                  color: '#ffffff',
+                  fontSize: '13px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                }}
+              >
+                {selectedAnalysis?.id === analysis.id ? 'Masquer' : 'Voir'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  localStorage.setItem('lastAnalysis', JSON.stringify({
+                    purchasePrice: String(analysis.purchase_price),
+                    city: analysis.city,
+                    propertyType: analysis.property_type,
+                  }));
+                  router.push('/offre');
+                }}
+                style={{
+                  padding: '10px',
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  backgroundColor: '#ffffff',
+                  color: '#111827',
+                  fontSize: '13px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                }}
+              >
+                Faire une offre
+              </button>
+              <button
+                type="button"
+                onClick={() => shareAnalysis(analysis)}
+                disabled={sharingId === analysis.id}
+                style={{
+                  padding: '10px',
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  backgroundColor: copiedId === analysis.id ? '#f0fdf4' : '#ffffff',
+                  color: copiedId === analysis.id ? '#16a34a' : '#111827',
+                  fontSize: '13px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                }}
+              >
+                {copiedId === analysis.id ? 'Lien copie !' : sharingId === analysis.id ? '...' : 'Partager'}
+              </button>
+              <button
+                type="button"
+                onClick={() => deleteAnalysis(analysis.id)}
+                style={{
+                  padding: '10px',
+                  borderRadius: '8px',
+                  border: '1px solid #fecaca',
+                  backgroundColor: '#fef2f2',
+                  color: '#b91c1c',
+                  fontSize: '13px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                }}
+              >
+                Supprimer
+              </button>
+            </div>
             {renamingId === analysis.id && (
               <div style={{ marginTop: '8px', fontSize: '12px', color: '#64748b', fontWeight: 700 }}>
                 Enregistrement du nom...
@@ -410,6 +469,66 @@ export default function MesAnalysesPage() {
                 <strong style={{ color: '#0f172a', textAlign: 'right' }}>{value}</strong>
               </div>
             ))}
+            {(() => {
+              const effectiveRent = selectedAnalysis.raw_result?.effectiveRent ?? selectedAnalysis.effective_rent ?? 0;
+              const realCashflow = selectedAnalysis.raw_result?.realCashflow ?? selectedAnalysis.real_cashflow ?? 0;
+              const annualRent = effectiveRent * 12;
+              const taxRate = tmi / 100 + 0.172;
+              const foncierTax = annualRent * 0.70 * taxRate;
+              const bicTax = annualRent * 0.50 * taxRate;
+              const foncierNet = realCashflow - foncierTax / 12;
+              const bicNet = realCashflow - bicTax / 12;
+              const bicIsBetter = bicNet > foncierNet;
+              const fmt = (v: number) => (v < 0 ? '- ' : '') + Math.abs(Math.round(v)).toLocaleString('fr-FR') + ' EUR';
+              return (
+                <div style={{ marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingTop: '8px', borderTop: '1px solid #eef2f7' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', letterSpacing: '0.06em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Fiscal TMI</div>
+                    <div style={{ flex: 1, display: 'flex', padding: '3px', borderRadius: '8px', backgroundColor: '#f3f4f6', border: '1px solid #e5e7eb' }}>
+                      {[0, 11, 30, 41, 45].map((v) => (
+                        <button
+                          key={v}
+                          type="button"
+                          onClick={() => setTmi(v)}
+                          style={{
+                            flex: 1,
+                            padding: '5px 2px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            backgroundColor: tmi === v ? '#ffffff' : 'transparent',
+                            color: tmi === v ? '#111827' : '#6b7280',
+                            fontSize: '11px',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            boxShadow: tmi === v ? '0 1px 4px rgba(15, 23, 42, 0.10)' : 'none',
+                          }}
+                        >
+                          {v}%
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    {[
+                      { label: 'Nu · micro-foncier', net: foncierNet, tax: foncierTax, best: !bicIsBetter },
+                      { label: 'Meuble · micro-BIC', net: bicNet, tax: bicTax, best: bicIsBetter },
+                    ].map(({ label, net, tax, best }) => (
+                      <div key={label} style={{ padding: '10px', borderRadius: '8px', backgroundColor: best ? '#f0fdf4' : '#f8fafc', border: `1px solid ${best ? '#86efac' : '#e2e8f0'}` }}>
+                        <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 700, marginBottom: '6px' }}>{label}</div>
+                        <div style={{ fontSize: '16px', fontWeight: 900, color: net >= 0 ? '#16a34a' : '#dc2626' }}>{fmt(net)}</div>
+                        <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 600, marginTop: '1px', marginBottom: '6px' }}>net/mois apres impots</div>
+                        <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 700 }}>Impot estime</div>
+                        <div style={{ fontSize: '12px', fontWeight: 800, color: '#475569' }}>{fmt(tax)}<span style={{ fontSize: '10px', fontWeight: 600 }}>/an</span></div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600 }}>
+                    Calcul en regime micro — montant reel souvent inferieur grace aux deductions (interets, taxe fonciere, charges). Le LMNP au reel peut etre encore plus avantageux — consultez un comptable specialise.
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
       </section>
@@ -423,7 +542,7 @@ export default function MesAnalysesPage() {
           maxWidth: '430px',
           zIndex: 30,
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1fr 1fr',
+          gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr',
           gap: '6px',
           padding: '7px',
           borderRadius: '20px',
@@ -438,6 +557,7 @@ export default function MesAnalysesPage() {
           { href: '/offre', label: 'Offre', active: false, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></> },
           { href: '/copro', label: 'Copro', active: false, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></> },
           { href: '/mes-analyses', label: 'Historique', active: true, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></> },
+          { href: '/compte', label: 'Compte', active: false, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></> },
         ].map((item) => (
           <a
             key={item.label}

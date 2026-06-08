@@ -2,6 +2,7 @@
 
 import { PDFDownloadLink, Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 import { useEffect, useMemo, useState } from 'react';
+import { supabase } from '@/lib/supabase/client';
 
 type FinancingType = 'cash' | 'loan';
 
@@ -20,6 +21,7 @@ type OfferForm = {
   offerValidityDays: string;
   cityOfSignature: string;
   loanPreApprovalBank: string;
+  buyerCompany: string;
   loanApproval: boolean;
   satisfactoryDiagnostics: boolean;
   satisfactoryCoownershipDocuments: boolean;
@@ -43,6 +45,7 @@ const initialForm: OfferForm = {
   offerValidityDays: '7',
   cityOfSignature: '',
   loanPreApprovalBank: '',
+  buyerCompany: '',
   loanApproval: true,
   satisfactoryDiagnostics: true,
   satisfactoryCoownershipDocuments: true,
@@ -486,6 +489,12 @@ const PurchaseOfferDocument = ({ form, documentRef }: { form: OfferForm; documen
                   <Text style={pdfStyles.rowLabel}>Telephone</Text>
                   <Text style={pdfStyles.rowValue}>{form.buyerPhone || '--'}</Text>
                 </View>
+                {form.buyerCompany ? (
+                  <View style={pdfStyles.row}>
+                    <Text style={pdfStyles.rowLabel}>Societe</Text>
+                    <Text style={pdfStyles.rowValue}>{form.buyerCompany}</Text>
+                  </View>
+                ) : null}
               </View>
             </View>
 
@@ -629,6 +638,7 @@ export default function PurchaseOfferPage() {
     try {
       const saved = localStorage.getItem('lastAnalysis');
       if (!saved) return;
+      localStorage.removeItem('lastAnalysis');
       const data = JSON.parse(saved) as { purchasePrice?: string; city?: string; propertyType?: string };
       const typeMap: Record<string, string> = {
         apartment: 'Appartement',
@@ -643,6 +653,24 @@ export default function PurchaseOfferPage() {
         propertyAddress: data.city ? data.city : prev.propertyAddress,
       }));
     } catch {}
+  }, []);
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) return;
+      const meta = data.user.user_metadata ?? {};
+      const fullName = [meta.prenom, meta.nom].filter(Boolean).join(' ');
+      setForm((prev) => ({
+        ...prev,
+        buyerFullName: prev.buyerFullName || fullName,
+        buyerAddress: prev.buyerAddress || (meta.adresse ?? ''),
+        buyerPhone: prev.buyerPhone || (meta.telephone ?? ''),
+        buyerEmail: prev.buyerEmail || (data.user?.email ?? ''),
+        buyerCompany: prev.buyerCompany || (meta.societe ?? ''),
+      }));
+    };
+    loadProfile();
   }, []);
 
   const fileName = useMemo(() => {
@@ -821,6 +849,10 @@ export default function PurchaseOfferPage() {
                 <input value={form.buyerPhone} onChange={(event) => updateField('buyerPhone', event.target.value)} style={inputStyle} />
               </label>
             </div>
+            <label style={labelStyle}>
+              Société
+              <input value={form.buyerCompany} onChange={(event) => updateField('buyerCompany', event.target.value)} placeholder="Optionnel" style={inputStyle} />
+            </label>
           </div>
         </div>
 
@@ -1107,7 +1139,7 @@ export default function PurchaseOfferPage() {
           maxWidth: '430px',
           zIndex: 30,
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1fr 1fr',
+          gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr',
           gap: '6px',
           padding: '7px',
           borderRadius: '20px',
@@ -1122,6 +1154,7 @@ export default function PurchaseOfferPage() {
           { href: '/offre', label: 'Offre', active: true, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></> },
           { href: '/copro', label: 'Copro', active: false, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></> },
           { href: '/mes-analyses', label: 'Historique', active: false, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></> },
+          { href: '/compte', label: 'Compte', active: false, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></> },
         ].map((item) => (
           <a
             key={item.label}
