@@ -1,6 +1,6 @@
 'use client';
 
-import { ChangeEvent, FormEvent, useState } from 'react';
+import { ChangeEvent, FormEvent, useRef, useState } from 'react';
 
 type CoproAnalysis = {
   summary: string;
@@ -18,7 +18,7 @@ type CoproAnalysis = {
 
 const emptySections = [
   { key: 'positives', title: 'Points positifs' },
-  { key: 'alerts', title: 'Points d’alerte' },
+  { key: 'alerts', title: "Points d'alerte" },
   { key: 'votedWorks', title: 'Travaux votés' },
   { key: 'futureWorks', title: 'Travaux envisagés' },
   { key: 'legalIssues', title: 'Procédures ou litiges' },
@@ -51,6 +51,8 @@ export default function CoproPage() {
   const [result, setResult] = useState<CoproAnalysis | null>(null);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showUploadGuide, setShowUploadGuide] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFilesChange = (event: ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(event.target.files ?? []).filter(isAcceptedFile);
@@ -88,7 +90,7 @@ export default function CoproPage() {
 
       setResult(data as CoproAnalysis);
     } catch {
-      setError('Erreur pendant l’analyse. Réessaie avec des fichiers plus nets ou moins volumineux.');
+      setError("Erreur pendant l'analyse. Réessaie avec des fichiers plus nets ou moins volumineux.");
     } finally {
       setIsLoading(false);
     }
@@ -96,10 +98,10 @@ export default function CoproPage() {
 
   const cardStyle = {
     padding: '16px',
-    borderRadius: '14px',
+    borderRadius: '12px',
     backgroundColor: '#ffffff',
     border: '1px solid rgba(226, 232, 240, 0.9)',
-    boxShadow: '0 10px 30px rgba(15, 23, 42, 0.06)',
+    boxShadow: '0 1px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)',
   } as const;
 
   const sectionTitleStyle = {
@@ -135,10 +137,10 @@ export default function CoproPage() {
         <header
           style={{
             padding: '18px',
-            borderRadius: '18px',
+            borderRadius: '16px',
             background: 'linear-gradient(145deg, #0f172a 0%, #1f2937 100%)',
             color: '#ffffff',
-            boxShadow: '0 18px 40px rgba(15, 23, 42, 0.22)',
+            boxShadow: '0 1px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)',
           }}
         >
           <div
@@ -160,14 +162,18 @@ export default function CoproPage() {
             Analyse copropriété
           </h1>
           <p style={{ margin: '6px 0 0', fontSize: '14px', color: '#cbd5e1', lineHeight: 1.45 }}>
-            Repère les travaux, litiges et risques financiers avant d’acheter.
+            Repère les travaux, litiges et risques financiers avant d'acheter.
           </p>
         </header>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div style={cardStyle}>
             <div style={sectionTitleStyle}>Documents</div>
-            <label
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => fileInputRef.current?.click()}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') fileInputRef.current?.click(); }}
               style={{
                 display: 'flex',
                 minHeight: '132px',
@@ -188,16 +194,68 @@ export default function CoproPage() {
             >
               <span>Ajouter PDF ou images</span>
               <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>
-                PV d’AG, budget, travaux, diagnostics ou pages scannées
+                PV d\'AG, budget, travaux, diagnostics ou pages scannées
+              </span>
+              <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600 }}>
+                PDF, JPEG, PNG, WebP — 10 Mo max par fichier
               </span>
               <input
+                ref={fileInputRef}
                 type="file"
                 accept="application/pdf,image/jpeg,image/png,image/webp"
                 multiple
                 onChange={handleFilesChange}
                 style={{ display: 'none' }}
               />
-            </label>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowUploadGuide((prev) => !prev)}
+              style={{
+                marginTop: '8px',
+                border: 'none',
+                background: 'none',
+                padding: '6px 0',
+                cursor: 'pointer',
+                fontSize: '12px',
+                color: '#2563eb',
+                fontWeight: 700,
+                textAlign: 'left',
+                display: 'block',
+              }}
+            >
+              {showUploadGuide ? 'Masquer le guide' : 'Quels documents uploader ?'}
+            </button>
+            {showUploadGuide && (
+              <div
+                style={{
+                  marginTop: '4px',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  backgroundColor: '#f0f9ff',
+                  border: '1px solid #bae6fd',
+                  fontSize: '13px',
+                  color: '#0369a1',
+                  lineHeight: 1.55,
+                }}
+              >
+                <div style={{ fontWeight: 700, marginBottom: '6px' }}>Pour une analyse optimale :</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  {[
+                    "Procès-verbal de la dernière Assemblée Générale",
+                    "Budget prévisionnel de la copropriété",
+                    "Carnet d'entretien de l'immeuble",
+                    "Appel de fonds ou état des charges",
+                    "Diagnostics techniques (facultatif)",
+                  ].map((item) => (
+                    <div key={item} style={{ display: 'flex', gap: '6px' }}>
+                      <span style={{ color: '#0284c7', fontWeight: 800 }}>-</span>
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             {files.length > 0 && (
               <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '7px' }}>
                 {files.map((file) => (
@@ -208,7 +266,7 @@ export default function CoproPage() {
                       justifyContent: 'space-between',
                       gap: '12px',
                       padding: '9px 10px',
-                      borderRadius: '10px',
+                      borderRadius: '8px',
                       backgroundColor: '#f1f5f9',
                       color: '#334155',
                       fontSize: '13px',
@@ -255,10 +313,10 @@ export default function CoproPage() {
               fontWeight: 850,
               cursor: isLoading ? 'default' : 'pointer',
               opacity: isLoading ? 0.75 : 1,
-              boxShadow: '0 14px 28px rgba(17, 24, 39, 0.22)',
+              boxShadow: '0 4px 16px rgba(17, 24, 39, 0.12)',
             }}
           >
-            {isLoading ? 'Analyse en cours...' : 'Analyser les documents'}
+            {isLoading ? 'Analyse en cours... (~30 secondes)' : 'Analyser les documents'}
           </button>
         </form>
 
@@ -269,11 +327,11 @@ export default function CoproPage() {
                 position: 'relative',
                 overflow: 'hidden',
                 padding: '18px',
-                borderRadius: '22px',
+                borderRadius: '20px',
                 background:
                   'radial-gradient(circle at top right, rgba(148, 163, 184, 0.32), transparent 34%), linear-gradient(145deg, #0f172a 0%, #111827 48%, #1e293b 100%)',
                 border: '1px solid rgba(255, 255, 255, 0.10)',
-                boxShadow: '0 22px 50px rgba(15, 23, 42, 0.24)',
+                boxShadow: '0 1px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)',
                 color: '#ffffff',
               }}
             >
@@ -338,7 +396,7 @@ export default function CoproPage() {
             })}
 
             <p style={{ margin: '0 0 8px', fontSize: '12px', color: '#64748b', lineHeight: 1.45, textAlign: 'center' }}>
-              Cette analyse est une aide à la lecture des documents et ne remplace pas l’avis d’un notaire, avocat ou professionnel de la copropriété.
+              Cette analyse est une aide à la lecture des documents et ne remplace pas l'avis d'un notaire, avocat ou professionnel de la copropriété.
             </p>
           </div>
         )}
@@ -354,35 +412,43 @@ export default function CoproPage() {
           maxWidth: '430px',
           zIndex: 30,
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1fr',
+          gridTemplateColumns: '1fr 1fr 1fr 1fr',
           gap: '6px',
           padding: '7px',
-          borderRadius: '22px',
+          borderRadius: '20px',
           backgroundColor: 'rgba(255, 255, 255, 0.92)',
           border: '1px solid rgba(203, 213, 225, 0.75)',
-          boxShadow: '0 18px 45px rgba(15, 23, 42, 0.18)',
+          boxShadow: '0 1px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)',
           backdropFilter: 'blur(16px)',
         }}
       >
         {[
-          { href: '/analyse', label: 'Analyse', active: false },
-          { href: '/offre', label: 'Offre', active: false },
-          { href: '/copro', label: 'Copro', active: true },
+          { href: '/analyse', label: 'Analyse', active: false, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></> },
+          { href: '/offre', label: 'Offre', active: false, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></> },
+          { href: '/copro', label: 'Copro', active: true, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></> },
+          { href: '/mes-analyses', label: 'Historique', active: false, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></> },
         ].map((item) => (
           <a
             key={item.label}
             href={item.href}
             style={{
-              padding: '11px 8px',
+              padding: '8px 4px 6px',
               borderRadius: '16px',
               backgroundColor: item.active ? '#0f172a' : 'transparent',
               color: item.active ? '#ffffff' : '#64748b',
               textAlign: 'center',
               textDecoration: 'none',
-              fontSize: '13px',
-              fontWeight: 850,
+              fontSize: '11px',
+              fontWeight: 700,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '3px',
             }}
           >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              {item.icon}
+            </svg>
             {item.label}
           </a>
         ))}

@@ -33,7 +33,7 @@ export default function SignupPage() {
 
     if (data) {
       setSuccessMessage('Compte créé. Vérifie tes emails si une confirmation est demandée.');
-      router.push('/analyse');
+      router.push('/onboarding');
     }
   };
 
@@ -42,13 +42,21 @@ export default function SignupPage() {
       style={{
         minHeight: '100vh',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         padding: '24px',
         backgroundColor: '#f8fafc',
-        fontFamily: 'system-ui, sans-serif',
       }}
     >
+      <div style={{ width: '100%', maxWidth: '380px', marginBottom: '24px', textAlign: 'center' }}>
+        <div style={{ fontSize: '28px', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.03em' }}>
+          immo<span style={{ color: '#2563eb' }}>.ai</span>
+        </div>
+        <p style={{ margin: '8px 0 0', fontSize: '14px', color: '#64748b', lineHeight: 1.45 }}>
+          Analyse tes investissements immobiliers en quelques secondes.
+        </p>
+      </div>
       <form
         onSubmit={handleSubmit}
         style={{
@@ -58,7 +66,7 @@ export default function SignupPage() {
           borderRadius: '16px',
           backgroundColor: '#ffffff',
           border: '1px solid #e5e7eb',
-          boxShadow: '0 12px 30px rgba(15, 23, 42, 0.08)',
+          boxShadow: '0 1px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)',
         }}
       >
         <h1 style={{ margin: '0 0 20px', fontSize: '24px', color: '#111827' }}>
@@ -72,7 +80,7 @@ export default function SignupPage() {
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             required
-            style={{ padding: '12px', borderRadius: '10px', border: '1px solid #d1d5db', fontSize: '16px' }}
+            style={{ padding: '12px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '16px' }}
           />
         </label>
 
@@ -83,7 +91,7 @@ export default function SignupPage() {
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             required
-            style={{ padding: '12px', borderRadius: '10px', border: '1px solid #d1d5db', fontSize: '16px' }}
+            style={{ padding: '12px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '16px' }}
           />
         </label>
 
@@ -95,8 +103,8 @@ export default function SignupPage() {
           disabled={isLoading}
           style={{
             width: '100%',
-            padding: '13px',
-            borderRadius: '10px',
+            padding: '12px',
+            borderRadius: '8px',
             border: 'none',
             backgroundColor: '#111827',
             color: '#ffffff',
@@ -109,7 +117,19 @@ export default function SignupPage() {
           {isLoading ? 'Création...' : 'Créer mon compte'}
         </button>
 
-        <p style={{ margin: '16px 0 0', fontSize: '14px', color: '#6b7280', textAlign: 'center' }}>
+        <p style={{ margin: '16px 0 0', fontSize: '12px', color: '#9ca3af', textAlign: 'center', lineHeight: 1.5 }}>
+          En créant un compte, tu acceptes nos{' '}
+          <Link href="/cgu" style={{ color: '#6b7280', fontWeight: 600 }}>
+            Conditions générales
+          </Link>{' '}
+          et notre{' '}
+          <Link href="/confidentialite" style={{ color: '#6b7280', fontWeight: 600 }}>
+            Politique de confidentialité
+          </Link>
+          .
+        </p>
+
+        <p style={{ margin: '12px 0 0', fontSize: '14px', color: '#6b7280', textAlign: 'center' }}>
           Déjà un compte ?{' '}
           <Link href="/login" style={{ color: '#111827', fontWeight: 700 }}>
             Se connecter

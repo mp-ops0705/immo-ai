@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 
@@ -95,7 +95,7 @@ const rentTypeLabels: Record<string, string> = {
 };
 
 const rentReliabilityLabels: Record<string, string> = {
-  deterministic: 'Donnée issue de l’annonce',
+  deterministic: "Donnée issue de l'annonce",
   cc_estimated: 'Estimation IA (CC sans détail)',
   ai_fallback: 'Estimation IA',
   default: 'Valeur par défaut',
@@ -281,7 +281,7 @@ const generateInsight = (grossYield: number, realCashflow: number) => {
   if (realCashflow > -500) {
     return 'Cashflow négatif marqué : la rentabilité est insuffisante sans baisse de prix.';
   }
-  return 'Cashflow très dégradé ou rendement trop faible : le prix actuel n’est pas cohérent avec l’objectif locatif.';
+  return "Cashflow très dégradé ou rendement trop faible : le prix actuel n'est pas cohérent avec l'objectif locatif.";
 };
 
 const calculatePriceForTargetGrossYield = (
@@ -423,11 +423,14 @@ export default function AnalysePage() {
   const [hasApport, setHasApport] = useState(false);
   const [apport, setApport] = useState('0');
   const [showAutoFinancing, setShowAutoFinancing] = useState(false);
+  const scoreCardRef = useRef<HTMLDivElement>(null);
   const [aiResult, setAiResult] = useState<AiEstimate | null>(null);
   const [result, setResult] = useState<Result | null>(null);
   const [scrapingError, setScrapingError] = useState(false);
   const [insufficientDataError, setInsufficientDataError] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
+  const [showAllDetails, setShowAllDetails] = useState(false);
+  const [openTooltip, setOpenTooltip] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState('');
   const [marketRent, setMarketRent] = useState<MarketRent>({
     marketRentAvg: null,
@@ -472,6 +475,12 @@ export default function AnalysePage() {
       isMounted = false;
     };
   }, [router]);
+
+  useEffect(() => {
+    if (result && scoreCardRef.current) {
+      scoreCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [result]);
 
   useEffect(() => {
     const surfaceValue = parseFloat(surface);
@@ -763,13 +772,22 @@ export default function AnalysePage() {
         ? apiAnalysis.rentHigh
         : (apiAnalysis?.estimatedRent ?? effectiveRentValue) * 1.1;
 
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('lastAnalysis', JSON.stringify({
+          purchasePrice: String(purchaseBase),
+          city: apiAnalysis?.city || '',
+          propertyType,
+        }));
+      } catch {}
+    }
     setAiResult({
       estimatedRent: apiAnalysis?.estimatedRent ?? effectiveRentValue,
       rentLow,
       rentHigh,
       verdict: apiAnalysis?.verdict ?? 'loyer cohérent',
       confidence: apiAnalysis?.confidence ?? 'moyenne',
-      reasoning: apiAnalysis?.reasoning ?? 'Estimation basée sur les informations de l’annonce.',
+      reasoning: apiAnalysis?.reasoning ?? "Estimation basée sur les informations de l'annonce.",
       marketComment: apiAnalysis?.marketComment ?? 'Commentaire marché indisponible pour cette annonce.',
     });
 
@@ -934,6 +952,15 @@ export default function AnalysePage() {
       marketRentHigh: marketRent.marketRentHigh,
     });
 
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('lastAnalysis', JSON.stringify({
+          purchasePrice: String(purchaseValue),
+          city: city.trim(),
+          propertyType,
+        }));
+      } catch {}
+    }
     setAiResult(null);
   };
 
@@ -992,7 +1019,7 @@ export default function AnalysePage() {
   const inputStyle = {
     marginTop: '6px',
     padding: '14px 12px',
-    borderRadius: '10px',
+    borderRadius: '8px',
     border: '1px solid #e5e7eb',
     fontSize: '16px',
     color: '#111827',
@@ -1009,10 +1036,10 @@ export default function AnalysePage() {
   } as const;
   const cardStyle = {
     padding: '16px',
-    borderRadius: '14px',
+    borderRadius: '12px',
     backgroundColor: '#ffffff',
     border: '1px solid rgba(226, 232, 240, 0.9)',
-    boxShadow: '0 10px 30px rgba(15, 23, 42, 0.06)',
+    boxShadow: '0 1px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)',
   } as const;
   const sectionTitleStyle = {
     margin: '0 0 12px',
@@ -1064,10 +1091,10 @@ export default function AnalysePage() {
         <header
           style={{
             padding: '18px',
-            borderRadius: '18px',
+            borderRadius: '16px',
             background: 'linear-gradient(145deg, #0f172a 0%, #1f2937 100%)',
             color: '#ffffff',
-            boxShadow: '0 18px 40px rgba(15, 23, 42, 0.22)',
+            boxShadow: '0 1px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)',
           }}
         >
           <div
@@ -1096,15 +1123,16 @@ export default function AnalysePage() {
 
         {result && (
           <div
+            ref={scoreCardRef}
             style={{
               position: 'relative',
               overflow: 'hidden',
               padding: '18px',
-              borderRadius: '22px',
+              borderRadius: '20px',
               background:
                 'radial-gradient(circle at top right, rgba(148, 163, 184, 0.32), transparent 34%), linear-gradient(145deg, #0f172a 0%, #111827 48%, #1e293b 100%)',
               border: '1px solid rgba(255, 255, 255, 0.10)',
-              boxShadow: '0 22px 50px rgba(15, 23, 42, 0.24)',
+              boxShadow: '0 1px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)',
               display: 'flex',
               flexDirection: 'column',
               gap: '14px',
@@ -1122,41 +1150,60 @@ export default function AnalysePage() {
                 background: 'rgba(255, 255, 255, 0.08)',
               }}
             />
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
-              <div>
-                <div style={{ fontSize: '11px', color: '#cbd5e1', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                  Score global
+            {(() => {
+              const pct = Math.min(Math.max(result.score / 10, 0), 1);
+              const r = 28;
+              const circ = 2 * Math.PI * r;
+              const dash = pct * circ;
+              const scoreColor = result.score >= 7.5 ? '#86efac' : result.score >= 5 ? '#fcd34d' : '#fca5a5';
+              return (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontSize: '11px', color: '#cbd5e1', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '10px' }}>
+                      Score global
+                    </div>
+                    <svg width="72" height="72" viewBox="0 0 72 72">
+                      <circle cx="36" cy="36" r={r} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="6" />
+                      <circle
+                        cx="36" cy="36" r={r} fill="none"
+                        stroke={scoreColor} strokeWidth="6"
+                        strokeDasharray={`${dash} ${circ - dash}`}
+                        strokeLinecap="round"
+                        transform="rotate(-90 36 36)"
+                      />
+                      <text x="36" y="40" textAnchor="middle" fill="#ffffff" fontSize="18" fontWeight="800" fontFamily="inherit">
+                        {result.score}
+                      </text>
+                    </svg>
+                  </div>
+                  <div
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '999px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                      border: `1px solid ${scoreColor}40`,
+                      color: scoreColor,
+                      fontSize: '15px',
+                      fontWeight: 800,
+                      letterSpacing: '-0.01em',
+                    }}
+                  >
+                    {result.status}
+                  </div>
                 </div>
-                <div style={{ marginTop: '3px', fontSize: '34px', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.04em' }}>
-                  {result.score}/10
-                </div>
-              </div>
-              <div
-                style={{
-                  padding: '8px 11px',
-                  borderRadius: '999px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.10)',
-                  border: '1px solid rgba(255, 255, 255, 0.14)',
-                  color: '#e5e7eb',
-                  fontSize: '13px',
-                  fontWeight: 800,
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {result.status}
-              </div>
-            </div>
+              );
+            })()}
             <div style={{ fontSize: '14px', color: '#dbeafe', lineHeight: 1.45, fontWeight: 650 }}>
               {result.insight}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              <div style={{ padding: '13px', borderRadius: '15px', backgroundColor: 'rgba(255, 255, 255, 0.09)', border: '1px solid rgba(255, 255, 255, 0.10)' }}>
+              <div style={{ padding: '12px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.09)', border: '1px solid rgba(255, 255, 255, 0.10)' }}>
                 <div style={{ fontSize: '12px', color: '#cbd5e1', fontWeight: 700 }}>Cashflow réel</div>
                 <div style={{ marginTop: '5px', fontSize: '20px', fontWeight: 900, color: result.realCashflow >= 0 ? '#86efac' : '#fca5a5' }}>
                   {formatCurrency(result.realCashflow)}
                 </div>
               </div>
-              <div style={{ padding: '13px', borderRadius: '15px', backgroundColor: 'rgba(255, 255, 255, 0.09)', border: '1px solid rgba(255, 255, 255, 0.10)' }}>
+              <div style={{ padding: '12px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.09)', border: '1px solid rgba(255, 255, 255, 0.10)' }}>
                 <div style={{ fontSize: '12px', color: '#cbd5e1', fontWeight: 700 }}>Rendement net</div>
                 <div style={{ marginTop: '5px', fontSize: '20px', fontWeight: 900, color: '#ffffff' }}>
                   {result.netYield.toFixed(2)}%
@@ -1209,7 +1256,7 @@ export default function AnalysePage() {
                     gridTemplateColumns: '1fr 1fr 1fr',
                     gap: '6px',
                     padding: '4px',
-                    borderRadius: '10px',
+                    borderRadius: '8px',
                     backgroundColor: '#f3f4f6',
                     border: '1px solid #e5e7eb',
                   }}
@@ -1375,14 +1422,19 @@ export default function AnalysePage() {
               </span>
             </button>
             {!showAutoFinancing ? (
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', fontSize: '13px', color: '#6b7280' }}>
-                <span>Apport {formatCurrency(parseFloat(apport) || 0)}</span>
-                <span>•</span>
-                <span>{interestRate || '4'}%</span>
-                <span>•</span>
-                <span>{loanDuration || '25'} ans</span>
-                <span>•</span>
-                <span>Notaire {formatCurrency(estimatedNotaryFees)}</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', fontSize: '13px', color: '#6b7280' }}>
+                  <span>Apport {formatCurrency(parseFloat(apport) || 0)}</span>
+                  <span>•</span>
+                  <span>{interestRate || '4'}%</span>
+                  <span>•</span>
+                  <span>{loanDuration || '25'} ans</span>
+                  <span>•</span>
+                  <span>Notaire {formatCurrency(estimatedNotaryFees)}</span>
+                </div>
+                <div style={{ fontSize: '12px', color: '#f59e0b', fontWeight: 700 }}>
+                  Valeurs par défaut appliquées — vérifie avant d'analyser
+                </div>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '11px', marginTop: '12px' }}>
@@ -1508,7 +1560,7 @@ export default function AnalysePage() {
               fontSize: '16px',
               fontWeight: 800,
               cursor: 'pointer',
-              boxShadow: '0 14px 28px rgba(17, 24, 39, 0.22)',
+              boxShadow: '0 4px 16px rgba(17, 24, 39, 0.12)',
             }}
           >
             Analyser
@@ -1524,37 +1576,109 @@ export default function AnalysePage() {
         {result && (
           <div style={{ ...cardStyle, display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{ ...sectionTitleStyle, color: '#334155' }}>Détails</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {[
-                ['Loyer annuel', formatCurrency(result.annualRent)],
-                ['Mensualité', formatCurrency(result.monthlyPayment)],
+            {(() => {
+              const tooltips: Record<string, string> = {
+                'Rendement brut': "Loyer annuel / prix total x 100. Ne tient pas compte des charges.",
+                'Rendement net': "Loyer net de charges / prix total x 100. Plus représentatif de la rentabilité réelle.",
+                'Cashflow reel': "Loyer mensuel − mensualité − charges. Trésorerie nette chaque mois.",
+              };
+              const primaryMetrics: [string, string][] = [
                 ['Rendement brut', `${result.grossYield.toFixed(2)}%`],
                 ['Rendement net', `${result.netYield.toFixed(2)}%`],
-                ['Cashflow réel', formatCurrency(result.realCashflow)],
+                ['Cashflow reel', formatCurrency(result.realCashflow)],
+                ['Mensualite', formatCurrency(result.monthlyPayment)],
+              ];
+              const secondaryMetrics: [string, string][] = [
+                ['Loyer annuel', formatCurrency(result.annualRent)],
                 ['Charges/mois', formatCurrency(result.monthlyCharges)],
                 ['Investissement', formatCurrency(result.totalInvestment)],
-                ['Financé', formatCurrency(result.loanAmount)],
-              ].map(([label, value]) => (
+                ['Finance', formatCurrency(result.loanAmount)],
+              ];
+              const labelDisplay: Record<string, string> = {
+                'Rendement brut': 'Rendement brut',
+                'Rendement net': 'Rendement net',
+                'Cashflow reel': 'Cashflow réel',
+                'Mensualite': 'Mensualité',
+                'Loyer annuel': 'Loyer annuel',
+                'Charges/mois': 'Charges/mois',
+                'Investissement': 'Investissement',
+                'Finance': 'Financé',
+              };
+              const renderRow = (key: string, value: string) => (
                 <div
-                  key={label}
+                  key={key}
                   style={{
                     display: 'flex',
                     justifyContent: 'space-between',
-                    alignItems: 'baseline',
+                    alignItems: 'center',
                     gap: '12px',
                     paddingBottom: '8px',
                     borderBottom: '1px solid #eef2f7',
                   }}
                 >
-                  <div style={{ fontSize: '13px', color: '#475569', fontWeight: 650 }}>
-                    {label}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <div style={{ fontSize: '13px', color: '#475569', fontWeight: 650 }}>
+                      {labelDisplay[key]}
+                    </div>
+                    {tooltips[key] && (
+                      <button
+                        type="button"
+                        onClick={() => setOpenTooltip(openTooltip === key ? null : key)}
+                        style={{
+                          border: 'none',
+                          background: 'none',
+                          padding: '0 2px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          color: '#94a3b8',
+                          lineHeight: 1,
+                        }}
+                      >
+                        i
+                      </button>
+                    )}
                   </div>
                   <div style={{ fontSize: '14px', color: '#0f172a', fontWeight: 800, textAlign: 'right' }}>
                     {value}
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {openTooltip && tooltips[openTooltip] && (
+                    <div style={{
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      backgroundColor: '#f0f9ff',
+                      border: '1px solid #bae6fd',
+                      fontSize: '12px',
+                      color: '#0369a1',
+                      lineHeight: 1.5,
+                    }}>
+                      {tooltips[openTooltip]}
+                    </div>
+                  )}
+                  {primaryMetrics.map(([key, value]) => renderRow(key, value))}
+                  {showAllDetails && secondaryMetrics.map(([key, value]) => renderRow(key, value))}
+                  <button
+                    type="button"
+                    onClick={() => setShowAllDetails((prev) => !prev)}
+                    style={{
+                      border: 'none',
+                      background: 'none',
+                      padding: '4px 0',
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      color: '#2563eb',
+                      fontWeight: 700,
+                      textAlign: 'left',
+                    }}
+                  >
+                    {showAllDetails ? 'Masquer les détails' : 'Voir tous les détails'}
+                  </button>
+                </div>
+              );
+            })()}
             {(() => {
               const rentLowValue = result.marketRentLow ?? null;
               const rentHighValue = result.marketRentHigh ?? null;
@@ -1568,7 +1692,7 @@ export default function AnalysePage() {
                 <div
                   style={{
                     padding: '10px 0 2px',
-                    borderRadius: '10px',
+                    borderRadius: '8px',
                     backgroundColor: '#ffffff',
                   }}
                 >
@@ -1609,7 +1733,7 @@ export default function AnalysePage() {
                         borderRadius: '50%',
                         backgroundColor: '#0f172a',
                         border: '2px solid #ffffff',
-                        boxShadow: '0 4px 12px rgba(15, 23, 42, 0.25)',
+                        boxShadow: '0 2px 8px rgba(15, 23, 42, 0.10)',
                       }}
                     />
                   </div>
@@ -1632,40 +1756,40 @@ export default function AnalysePage() {
               <div>Prix max pour 8% brut : {formatCurrency(result.targetPriceGross8)}</div>
               <div>Prix max cashflow neutre : {formatCurrency(result.targetPriceBreakEven)}</div>
             </div>
-            <button
-              type="button"
-              onClick={handleSaveAnalysis}
-              disabled={saveStatus === 'saving'}
-              style={{
-                padding: '13px',
-                borderRadius: '10px',
-                border: 'none',
-                backgroundColor: '#111827',
-                color: '#ffffff',
-                fontSize: '14px',
-                fontWeight: 800,
-                cursor: saveStatus === 'saving' ? 'default' : 'pointer',
-                opacity: saveStatus === 'saving' ? 0.75 : 1,
-              }}
-            >
-              {saveStatus === 'saving' ? 'Enregistrement...' : 'Enregistrer l’analyse'}
-            </button>
             <Link
               href="/offre"
               style={{
-                padding: '13px',
-                borderRadius: '10px',
-                border: '1px solid #cbd5e1',
-                backgroundColor: '#ffffff',
-                color: '#111827',
+                padding: '12px',
+                borderRadius: '8px',
+                border: 'none',
+                backgroundColor: '#111827',
+                color: '#ffffff',
                 fontSize: '14px',
                 fontWeight: 800,
                 textAlign: 'center',
                 textDecoration: 'none',
               }}
             >
-              Faire une offre
+              Faire une offre →
             </Link>
+            <button
+              type="button"
+              onClick={handleSaveAnalysis}
+              disabled={saveStatus === 'saving'}
+              style={{
+                padding: '12px',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                backgroundColor: '#ffffff',
+                color: '#111827',
+                fontSize: '14px',
+                fontWeight: 800,
+                cursor: saveStatus === 'saving' ? 'default' : 'pointer',
+                opacity: saveStatus === 'saving' ? 0.75 : 1,
+              }}
+            >
+              {saveStatus === 'saving' ? 'Enregistrement...' : "Enregistrer l'analyse"}
+            </button>
             {saveMessage && (
               <div
                 style={{
@@ -1685,10 +1809,10 @@ export default function AnalysePage() {
           href="/mes-analyses"
           style={{
             padding: '12px 14px',
-            borderRadius: '14px',
+            borderRadius: '12px',
             backgroundColor: '#ffffff',
             border: '1px solid rgba(226, 232, 240, 0.95)',
-            boxShadow: '0 8px 22px rgba(15, 23, 42, 0.05)',
+            boxShadow: '0 1px 3px rgba(15, 23, 42, 0.05)',
             color: '#0f172a',
             fontSize: '14px',
             fontWeight: 800,
@@ -1714,35 +1838,43 @@ export default function AnalysePage() {
           maxWidth: '430px',
           zIndex: 30,
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1fr',
+          gridTemplateColumns: '1fr 1fr 1fr 1fr',
           gap: '6px',
           padding: '7px',
-          borderRadius: '22px',
+          borderRadius: '20px',
           backgroundColor: 'rgba(255, 255, 255, 0.92)',
           border: '1px solid rgba(203, 213, 225, 0.75)',
-          boxShadow: '0 18px 45px rgba(15, 23, 42, 0.18)',
+          boxShadow: '0 1px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)',
           backdropFilter: 'blur(16px)',
         }}
       >
         {[
-          { href: '/analyse', label: 'Analyse', active: true },
-          { href: '/offre', label: 'Offre', active: false },
-          { href: '/copro', label: 'Copro', active: false },
+          { href: '/analyse', label: 'Analyse', active: true, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></> },
+          { href: '/offre', label: 'Offre', active: false, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></> },
+          { href: '/copro', label: 'Copro', active: false, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></> },
+          { href: '/mes-analyses', label: 'Historique', active: false, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></> },
         ].map((item) => (
           <a
             key={item.label}
             href={item.href}
             style={{
-              padding: '11px 8px',
+              padding: '8px 4px 6px',
               borderRadius: '16px',
               backgroundColor: item.active ? '#0f172a' : 'transparent',
               color: item.active ? '#ffffff' : '#64748b',
               textAlign: 'center',
               textDecoration: 'none',
-              fontSize: '13px',
-              fontWeight: 850,
+              fontSize: '11px',
+              fontWeight: 700,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '3px',
             }}
           >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              {item.icon}
+            </svg>
             {item.label}
           </a>
         ))}

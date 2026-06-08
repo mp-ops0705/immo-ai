@@ -19,11 +19,13 @@ type OfferForm = {
   loanAmount: string;
   offerValidityDays: string;
   cityOfSignature: string;
+  loanPreApprovalBank: string;
   loanApproval: boolean;
   satisfactoryDiagnostics: boolean;
   satisfactoryCoownershipDocuments: boolean;
   noMajorUndisclosedWorks: boolean;
   noLegalOrAdministrativeIssue: boolean;
+  customConditions: string[];
 };
 
 const initialForm: OfferForm = {
@@ -40,216 +42,293 @@ const initialForm: OfferForm = {
   loanAmount: '',
   offerValidityDays: '7',
   cityOfSignature: '',
+  loanPreApprovalBank: '',
   loanApproval: true,
   satisfactoryDiagnostics: true,
   satisfactoryCoownershipDocuments: true,
   noMajorUndisclosedWorks: true,
   noLegalOrAdministrativeIssue: true,
+  customConditions: [],
 };
 
 const pdfStyles = StyleSheet.create({
   page: {
-    padding: 36,
-    fontSize: 10.5,
-    color: '#111827',
+    padding: 0,
+    fontSize: 10,
+    color: '#1a1a2e',
     fontFamily: 'Helvetica',
-    lineHeight: 1.35,
+    lineHeight: 1.4,
     backgroundColor: '#ffffff',
   },
-  topBar: {
-    height: 4,
+  // HEADER
+  headerBg: {
     backgroundColor: '#0f172a',
-    marginBottom: 22,
+    paddingTop: 16,
+    paddingBottom: 12,
+    paddingHorizontal: 36,
   },
-  header: {
+  headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 24,
-    marginBottom: 22,
+    alignItems: 'flex-start',
+    marginBottom: 8,
   },
-  eyebrow: {
-    fontSize: 8,
+  headerDocType: {
+    fontSize: 7.5,
     color: '#64748b',
+    letterSpacing: 1.2,
     textTransform: 'uppercase',
-    letterSpacing: 1.4,
-    marginBottom: 6,
+    marginBottom: 3,
   },
-  titleBlock: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 24,
+  headerTitle: {
+    fontSize: 18,
     fontWeight: 700,
-    color: '#0f172a',
+    color: '#ffffff',
   },
-  headerMeta: {
-    width: 170,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    backgroundColor: '#f8fafc',
+  headerRight: {
+    alignItems: 'flex-end',
+    gap: 3,
   },
-  metaLine: {
-    fontSize: 9.5,
-    marginBottom: 4,
-    color: '#334155',
+  headerRightLine: {
+    fontSize: 8,
+    color: '#94a3b8',
   },
-  offerHero: {
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#cbd5e1',
-    backgroundColor: '#f8fafc',
-    marginBottom: 18,
+  headerRightBold: {
+    fontFamily: 'Helvetica-Bold',
+    color: '#e2e8f0',
   },
-  offerHeroLabel: {
+  headerDivider: {
+    height: 1,
+    backgroundColor: '#1e293b',
+    marginBottom: 8,
+  },
+  headerFaitA: {
     fontSize: 8,
     color: '#64748b',
+  },
+  headerFaitAVal: {
+    fontFamily: 'Helvetica-Bold',
+    color: '#cbd5e1',
+  },
+  // BODY
+  body: {
+    paddingHorizontal: 36,
+    paddingTop: 12,
+    paddingBottom: 20,
+  },
+  // OFFER HERO
+  offerHeroBar: {
+    backgroundColor: '#0f172a',
+    paddingHorizontal: 13,
+    paddingVertical: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  offerHeroBarLabel: {
+    fontSize: 7,
+    color: '#94a3b8',
     textTransform: 'uppercase',
     letterSpacing: 1,
-    marginBottom: 5,
   },
-  offerHeroAmount: {
-    fontSize: 25,
-    fontWeight: 700,
-    color: '#0f172a',
+  offerHeroBarAmount: {
+    fontSize: 19,
+    fontFamily: 'Helvetica-Bold',
+    color: '#ffffff',
   },
-  offerHeroText: {
-    marginTop: 6,
+  offerHeroDeclarationBlock: {
+    paddingHorizontal: 13,
+    paddingVertical: 8,
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderTopWidth: 0,
+    marginBottom: 9,
+  },
+  offerHeroDeclarationText: {
+    fontSize: 8.5,
     color: '#475569',
-    fontSize: 10,
+    lineHeight: 1.45,
   },
-  summaryGrid: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 18,
-  },
-  summaryItem: {
-    flex: 1,
-    padding: 11,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    backgroundColor: '#ffffff',
-  },
-  summaryLabel: {
-    fontSize: 8,
-    color: '#64748b',
-    textTransform: 'uppercase',
-    letterSpacing: 0.7,
-    marginBottom: 5,
-  },
-  summaryValue: {
-    fontSize: 13,
-    fontWeight: 700,
-    color: '#0f172a',
-  },
-  summaryMuted: {
-    fontSize: 9,
-    color: '#64748b',
-    marginTop: 3,
-  },
-  grid: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 14,
-  },
-  half: {
-    flex: 1,
-  },
-  section: {
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 9,
-    fontWeight: 700,
-    marginBottom: 8,
-    color: '#0f172a',
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
-    paddingVertical: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-  },
-  rowLabel: {
-    color: '#64748b',
-    width: 125,
-  },
-  rowValue: {
-    color: '#0f172a',
-    fontWeight: 700,
-    flex: 1,
-    textAlign: 'right',
-  },
-  line: {
-    marginBottom: 4,
-  },
-  paragraph: {
-    marginBottom: 10,
-    color: '#334155',
-  },
-  bullet: {
+  // SUMMARY CHIPS
+  summaryRow: {
     flexDirection: 'row',
     gap: 7,
-    marginBottom: 5,
+    marginBottom: 9,
   },
-  bulletDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#0f172a',
-    marginTop: 5,
-  },
-  bulletText: {
+  summaryChip: {
     flex: 1,
-    color: '#334155',
-  },
-  signature: {
-    marginTop: 18,
-    flexDirection: 'row',
-    gap: 20,
-  },
-  signatureBox: {
-    flex: 1,
-    height: 82,
+    paddingHorizontal: 8,
+    paddingVertical: 7,
+    backgroundColor: '#f8fafc',
     borderWidth: 1,
-    borderColor: '#cbd5e1',
-    padding: 10,
+    borderColor: '#e2e8f0',
+    borderLeftWidth: 3,
+    borderLeftColor: '#0f172a',
   },
-  signatureLabel: {
-    fontSize: 9,
+  summaryChipLabel: {
+    fontSize: 6.5,
     color: '#64748b',
     textTransform: 'uppercase',
     letterSpacing: 0.6,
+    marginBottom: 3,
   },
-  disclaimer: {
-    marginTop: 18,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
+  summaryChipValue: {
+    fontSize: 10.5,
+    fontFamily: 'Helvetica-Bold',
+    color: '#0f172a',
+  },
+  summaryChipSub: {
+    fontSize: 7,
+    color: '#94a3b8',
+    marginTop: 1,
+  },
+  // LAYOUT
+  grid: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 7,
+  },
+  col: {
+    flex: 1,
+  },
+  // SECTIONS
+  section: {
+    marginBottom: 7,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  sectionHeader: {
+    backgroundColor: '#f1f5f9',
+    paddingVertical: 4,
+    paddingHorizontal: 9,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
+  sectionTitle: {
+    fontSize: 7,
+    fontFamily: 'Helvetica-Bold',
+    color: '#334155',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  sectionBody: {
+    paddingHorizontal: 9,
+    paddingTop: 1,
+    paddingBottom: 2,
+  },
+  // ROWS
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+    paddingVertical: 3,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  rowLast: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+    paddingVertical: 3,
+  },
+  rowLabel: {
+    fontSize: 8.5,
+    color: '#64748b',
+    flex: 1,
+  },
+  rowValue: {
+    fontSize: 8.5,
+    fontFamily: 'Helvetica-Bold',
+    color: '#0f172a',
+    textAlign: 'right',
+    flex: 1,
+  },
+  // BULLETS
+  bulletRow: {
+    flexDirection: 'row',
+    gap: 6,
+    paddingVertical: 2,
+    alignItems: 'flex-start',
+  },
+  bulletMark: {
     fontSize: 9,
-    color: '#6b7280',
+    color: '#0f172a',
+    fontFamily: 'Helvetica-Bold',
+  },
+  bulletText: {
+    fontSize: 8.5,
+    color: '#334155',
+    flex: 1,
+    lineHeight: 1.4,
+  },
+  // SIGNATURES
+  signaturesSection: {
+    marginTop: 8,
+    flexDirection: 'row',
+    gap: 12,
+  },
+  signatureBox: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    padding: 9,
+    minHeight: 62,
+  },
+  signatureRole: {
+    fontSize: 7,
+    fontFamily: 'Helvetica-Bold',
+    color: '#0f172a',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    marginBottom: 3,
+  },
+  signatureName: {
+    fontSize: 8,
+    color: '#475569',
+    marginBottom: 2,
+  },
+  signatureDate: {
+    fontSize: 7.5,
+    color: '#94a3b8',
+    marginBottom: 14,
+  },
+  signatureLine: {
+    borderTopWidth: 1,
+    borderTopColor: '#94a3b8',
+    paddingTop: 3,
+  },
+  signatureLineLabel: {
+    fontSize: 7,
+    color: '#94a3b8',
+  },
+  // DISCLAIMER & FOOTER
+  disclaimer: {
+    marginTop: 8,
+    paddingTop: 7,
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+    fontSize: 7,
+    color: '#94a3b8',
+    lineHeight: 1.4,
   },
   footer: {
     position: 'absolute',
+    bottom: 12,
     left: 36,
     right: 36,
-    bottom: 22,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
     flexDirection: 'row',
     justifyContent: 'space-between',
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
+    paddingTop: 4,
+  },
+  footerText: {
+    fontSize: 7,
     color: '#94a3b8',
-    fontSize: 8,
   },
 });
+
 
 const parseAmount = (value: string) => {
   const parsed = Number(value);
@@ -275,6 +354,22 @@ const formatCurrencyNumber = (value: number | null) => {
   });
 };
 
+const formatPDFAmount = (value: string) => {
+  const parsed = parseAmount(value);
+  if (parsed === null || !Number.isFinite(parsed)) return '--';
+  const rounded = Math.round(parsed);
+  const abs = Math.abs(rounded).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  return (rounded < 0 ? '- ' : '') + abs + ' EUR';
+};
+
+const formatPDFAmountNumber = (value: number | null) => {
+  if (value === null || !Number.isFinite(value)) return '--';
+  const rounded = Math.round(value);
+  const abs = Math.abs(rounded).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  return (rounded < 0 ? '- ' : '') + abs + ' EUR';
+};
+
+
 const getValidityDate = (days: string) => {
   const parsedDays = Number(days);
   const safeDays = Number.isFinite(parsedDays) && parsedDays > 0 ? parsedDays : 7;
@@ -290,6 +385,7 @@ const getConditions = (form: OfferForm) =>
     form.satisfactoryCoownershipDocuments ? 'Documents de copropriété satisfaisants' : null,
     form.noMajorUndisclosedWorks ? 'Absence de travaux majeurs non communiqués' : null,
     form.noLegalOrAdministrativeIssue ? 'Absence de problème juridique ou administratif' : null,
+    ...form.customConditions,
   ].filter(Boolean) as string[];
 
 const PurchaseOfferDocument = ({ form, documentRef }: { form: OfferForm; documentRef: string }) => {
@@ -304,159 +400,219 @@ const PurchaseOfferDocument = ({ form, documentRef }: { form: OfferForm; documen
     negotiationGap !== null && listedAmount && listedAmount > 0
       ? (negotiationGap / listedAmount) * 100
       : null;
+  void documentRef;
 
   return (
     <Document>
       <Page size="A4" style={pdfStyles.page}>
-        <View style={pdfStyles.topBar} />
-        <View style={pdfStyles.header}>
-          <View style={pdfStyles.titleBlock}>
-            <Text style={pdfStyles.eyebrow}>Proposition d'acquisition</Text>
-            <Text style={pdfStyles.title}>Offre d'achat immobilier</Text>
-          </View>
-          <View style={pdfStyles.headerMeta}>
-            <Text style={pdfStyles.metaLine}>Référence : {documentRef}</Text>
-            <Text style={pdfStyles.metaLine}>Fait à : {form.cityOfSignature || '--'}</Text>
-            <Text style={pdfStyles.metaLine}>Date : {signatureDate}</Text>
-            <Text style={pdfStyles.metaLine}>Validité : jusqu'au {validityDate}</Text>
-          </View>
-        </View>
 
-        <View style={pdfStyles.offerHero}>
-          <Text style={pdfStyles.offerHeroLabel}>Montant de l'offre</Text>
-          <Text style={pdfStyles.offerHeroAmount}>{formatCurrency(form.offerPrice)}</Text>
-          <Text style={pdfStyles.offerHeroText}>
-            Offre formulée pour le bien situé : {form.propertyAddress || '--'}
+        {/* HEADER */}
+        <View style={pdfStyles.headerBg}>
+          <View style={pdfStyles.headerTop}>
+            <View>
+              <Text style={pdfStyles.headerDocType}>Proposition d'acquisition non contraignante</Text>
+              <Text style={pdfStyles.headerTitle}>Offre d'achat immobilier</Text>
+            </View>
+            <View style={pdfStyles.headerRight}>
+              <Text style={pdfStyles.headerRightLine}>
+                Date : <Text style={pdfStyles.headerRightBold}>{signatureDate}</Text>
+              </Text>
+              <Text style={pdfStyles.headerRightLine}>
+                Valide jusqu'au : <Text style={pdfStyles.headerRightBold}>{validityDate}</Text>
+              </Text>
+            </View>
+          </View>
+          <View style={pdfStyles.headerDivider} />
+          <Text style={pdfStyles.headerFaitA}>
+            Fait a : <Text style={pdfStyles.headerFaitAVal}>{form.cityOfSignature || '--'}</Text>
           </Text>
         </View>
 
-        <View style={pdfStyles.summaryGrid}>
-          <View style={pdfStyles.summaryItem}>
-            <Text style={pdfStyles.summaryLabel}>Prix affiché</Text>
-            <Text style={pdfStyles.summaryValue}>{formatCurrency(form.listedPrice)}</Text>
+        {/* BODY */}
+        <View style={pdfStyles.body}>
+
+          {/* OFFER HERO */}
+          <View style={pdfStyles.offerHeroBar}>
+            <Text style={pdfStyles.offerHeroBarLabel}>Montant de l'offre</Text>
+            <Text style={pdfStyles.offerHeroBarAmount}>{formatPDFAmount(form.offerPrice)}</Text>
           </View>
-          <View style={pdfStyles.summaryItem}>
-            <Text style={pdfStyles.summaryLabel}>Écart proposé</Text>
-            <Text style={pdfStyles.summaryValue}>{formatCurrencyNumber(negotiationGap)}</Text>
-            <Text style={pdfStyles.summaryMuted}>
-              {negotiationRate !== null ? `${negotiationRate.toFixed(1)}% du prix affiché` : '--'}
+          <View style={pdfStyles.offerHeroDeclarationBlock}>
+            <Text style={pdfStyles.offerHeroDeclarationText}>
+              Je soussigne(e) {form.buyerFullName || '__________'} propose d'acquerir le bien situe a{' '}
+              {form.propertyAddress || '--'} ({form.propertyType || '--'}) au prix de{' '}
+              {formatPDFAmount(form.offerPrice)}, selon les modalites et conditions ci-dessous.
             </Text>
           </View>
-          <View style={pdfStyles.summaryItem}>
-            <Text style={pdfStyles.summaryLabel}>Financement</Text>
-            <Text style={pdfStyles.summaryValue}>{form.financingType === 'cash' ? 'Comptant' : 'Crédit'}</Text>
-          </View>
-        </View>
 
-        <View style={pdfStyles.section}>
-          <Text style={pdfStyles.sectionTitle}>Déclaration d'intention</Text>
-          <Text style={pdfStyles.paragraph}>
-            Je soussigné(e) {form.buyerFullName || '--'} propose d'acquérir le bien désigné ci-dessous au prix de{' '}
-            {formatCurrency(form.offerPrice)}, selon les modalités et conditions indiquées dans le présent document.
+          {/* SUMMARY CHIPS */}
+          <View style={pdfStyles.summaryRow}>
+            <View style={pdfStyles.summaryChip}>
+              <Text style={pdfStyles.summaryChipLabel}>Prix affiche</Text>
+              <Text style={pdfStyles.summaryChipValue}>{formatPDFAmount(form.listedPrice)}</Text>
+            </View>
+            <View style={pdfStyles.summaryChip}>
+              <Text style={pdfStyles.summaryChipLabel}>Ecart negocie</Text>
+              <Text style={pdfStyles.summaryChipValue}>{formatPDFAmountNumber(negotiationGap)}</Text>
+              {negotiationRate !== null ? (
+                <Text style={pdfStyles.summaryChipSub}>{negotiationRate.toFixed(1)} % du prix affiche</Text>
+              ) : null}
+            </View>
+            <View style={pdfStyles.summaryChip}>
+              <Text style={pdfStyles.summaryChipLabel}>Financement</Text>
+              <Text style={pdfStyles.summaryChipValue}>{form.financingType === 'cash' ? 'Comptant' : 'Credit'}</Text>
+            </View>
+          </View>
+
+          {/* ACHETEUR + BIEN */}
+          <View style={pdfStyles.grid}>
+            <View style={[pdfStyles.section, pdfStyles.col]}>
+              <View style={pdfStyles.sectionHeader}>
+                <Text style={pdfStyles.sectionTitle}>Acheteur</Text>
+              </View>
+              <View style={pdfStyles.sectionBody}>
+                <View style={pdfStyles.row}>
+                  <Text style={pdfStyles.rowLabel}>Nom complet</Text>
+                  <Text style={pdfStyles.rowValue}>{form.buyerFullName || '--'}</Text>
+                </View>
+                <View style={pdfStyles.row}>
+                  <Text style={pdfStyles.rowLabel}>Adresse</Text>
+                  <Text style={pdfStyles.rowValue}>{form.buyerAddress || '--'}</Text>
+                </View>
+                <View style={pdfStyles.row}>
+                  <Text style={pdfStyles.rowLabel}>Email</Text>
+                  <Text style={pdfStyles.rowValue}>{form.buyerEmail || '--'}</Text>
+                </View>
+                <View style={pdfStyles.rowLast}>
+                  <Text style={pdfStyles.rowLabel}>Telephone</Text>
+                  <Text style={pdfStyles.rowValue}>{form.buyerPhone || '--'}</Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={[pdfStyles.section, pdfStyles.col]}>
+              <View style={pdfStyles.sectionHeader}>
+                <Text style={pdfStyles.sectionTitle}>Bien concerne</Text>
+              </View>
+              <View style={pdfStyles.sectionBody}>
+                <View style={pdfStyles.row}>
+                  <Text style={pdfStyles.rowLabel}>Type</Text>
+                  <Text style={pdfStyles.rowValue}>{form.propertyType || '--'}</Text>
+                </View>
+                <View style={pdfStyles.row}>
+                  <Text style={pdfStyles.rowLabel}>Adresse</Text>
+                  <Text style={pdfStyles.rowValue}>{form.propertyAddress || '--'}</Text>
+                </View>
+                <View style={pdfStyles.row}>
+                  <Text style={pdfStyles.rowLabel}>Prix affiche</Text>
+                  <Text style={pdfStyles.rowValue}>{formatPDFAmount(form.listedPrice)}</Text>
+                </View>
+                <View style={pdfStyles.rowLast}>
+                  <Text style={pdfStyles.rowLabel}>Prix propose</Text>
+                  <Text style={pdfStyles.rowValue}>{formatPDFAmount(form.offerPrice)}</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          {/* MODALITES FINANCIERES */}
+          <View style={pdfStyles.section}>
+            <View style={pdfStyles.sectionHeader}>
+              <Text style={pdfStyles.sectionTitle}>Modalites financieres</Text>
+            </View>
+            <View style={pdfStyles.sectionBody}>
+              <View style={pdfStyles.row}>
+                <Text style={pdfStyles.rowLabel}>Mode de financement</Text>
+                <Text style={pdfStyles.rowValue}>{form.financingType === 'cash' ? 'Comptant' : 'Credit immobilier'}</Text>
+              </View>
+              {form.financingType === 'loan' ? (
+                <>
+                  <View style={pdfStyles.row}>
+                    <Text style={pdfStyles.rowLabel}>Apport personnel</Text>
+                    <Text style={pdfStyles.rowValue}>{formatPDFAmount(form.contribution)}</Text>
+                  </View>
+                  <View style={pdfStyles.row}>
+                    <Text style={pdfStyles.rowLabel}>Montant emprunte</Text>
+                    <Text style={pdfStyles.rowValue}>{formatPDFAmount(form.loanAmount)}</Text>
+                  </View>
+                  {form.loanPreApprovalBank ? (
+                    <View style={pdfStyles.row}>
+                      <Text style={pdfStyles.rowLabel}>Accord de principe</Text>
+                      <Text style={pdfStyles.rowValue}>{form.loanPreApprovalBank}</Text>
+                    </View>
+                  ) : null}
+                </>
+              ) : null}
+              <View style={pdfStyles.rowLast}>
+                <Text style={pdfStyles.rowLabel}>Validite de l'offre</Text>
+                <Text style={pdfStyles.rowValue}>Jusqu'au {validityDate}</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* CONDITIONS SUSPENSIVES */}
+          <View style={pdfStyles.section}>
+            <View style={pdfStyles.sectionHeader}>
+              <Text style={pdfStyles.sectionTitle}>Conditions suspensives</Text>
+            </View>
+            <View style={pdfStyles.sectionBody}>
+              {conditions.length > 0 ? (
+                conditions.map((condition) => (
+                  <View key={condition} style={pdfStyles.bulletRow}>
+                    <Text style={pdfStyles.bulletMark}>-</Text>
+                    <Text style={pdfStyles.bulletText}>{condition}</Text>
+                  </View>
+                ))
+              ) : (
+                <Text style={{ fontSize: 8.5, color: '#94a3b8', paddingVertical: 4 }}>
+                  Aucune condition suspensive selectionnee.
+                </Text>
+              )}
+            </View>
+          </View>
+
+          {/* SIGNATURES */}
+          <View style={pdfStyles.signaturesSection}>
+            <View style={pdfStyles.signatureBox}>
+              <Text style={pdfStyles.signatureRole}>Acheteur</Text>
+              <Text style={pdfStyles.signatureName}>{form.buyerFullName || "Nom de l'acheteur"}</Text>
+              <Text style={pdfStyles.signatureDate}>Date : _____ / _____ / _________</Text>
+              <View style={pdfStyles.signatureLine}>
+                <Text style={pdfStyles.signatureLineLabel}>Signature</Text>
+              </View>
+            </View>
+            <View style={pdfStyles.signatureBox}>
+              <Text style={pdfStyles.signatureRole}>Vendeur / Representant</Text>
+              <Text style={pdfStyles.signatureName}>Acceptation de l'offre</Text>
+              <Text style={pdfStyles.signatureDate}>Date : _____ / _____ / _________</Text>
+              <View style={pdfStyles.signatureLine}>
+                <Text style={pdfStyles.signatureLineLabel}>Signature</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* DISCLAIMER */}
+          <Text style={pdfStyles.disclaimer}>
+            Ce document constitue une offre d'achat non contraignante (lettre d'intention). Il ne remplace pas un
+            avant-contrat signe devant notaire ou agent immobilier habilite. L'acheteur reste libre de retirer son
+            offre avant acceptation expresse du vendeur. A faire valider par un professionnel avant tout engagement.
           </Text>
         </View>
 
-        <View style={pdfStyles.grid}>
-          <View style={[pdfStyles.section, pdfStyles.half]}>
-            <Text style={pdfStyles.sectionTitle}>Acheteur</Text>
-            <View style={pdfStyles.row}>
-              <Text style={pdfStyles.rowLabel}>Nom</Text>
-              <Text style={pdfStyles.rowValue}>{form.buyerFullName || '--'}</Text>
-            </View>
-            <View style={pdfStyles.row}>
-              <Text style={pdfStyles.rowLabel}>Adresse</Text>
-              <Text style={pdfStyles.rowValue}>{form.buyerAddress || '--'}</Text>
-            </View>
-            <View style={pdfStyles.row}>
-              <Text style={pdfStyles.rowLabel}>Email</Text>
-              <Text style={pdfStyles.rowValue}>{form.buyerEmail || '--'}</Text>
-            </View>
-            <View style={pdfStyles.row}>
-              <Text style={pdfStyles.rowLabel}>Téléphone</Text>
-              <Text style={pdfStyles.rowValue}>{form.buyerPhone || '--'}</Text>
-            </View>
-          </View>
-
-          <View style={[pdfStyles.section, pdfStyles.half]}>
-            <Text style={pdfStyles.sectionTitle}>Bien concerné</Text>
-            <View style={pdfStyles.row}>
-              <Text style={pdfStyles.rowLabel}>Type</Text>
-              <Text style={pdfStyles.rowValue}>{form.propertyType || '--'}</Text>
-            </View>
-            <View style={pdfStyles.row}>
-              <Text style={pdfStyles.rowLabel}>Adresse</Text>
-              <Text style={pdfStyles.rowValue}>{form.propertyAddress || '--'}</Text>
-            </View>
-          </View>
-        </View>
-
-        <View style={pdfStyles.section}>
-          <Text style={pdfStyles.sectionTitle}>Modalités financières</Text>
-          <View style={pdfStyles.row}>
-            <Text style={pdfStyles.rowLabel}>Prix proposé</Text>
-            <Text style={pdfStyles.rowValue}>{formatCurrency(form.offerPrice)}</Text>
-          </View>
-          <View style={pdfStyles.row}>
-            <Text style={pdfStyles.rowLabel}>Mode de financement</Text>
-            <Text style={pdfStyles.rowValue}>{form.financingType === 'cash' ? 'Comptant' : 'Crédit immobilier'}</Text>
-          </View>
-          {form.financingType === 'loan' ? (
-            <>
-              <View style={pdfStyles.row}>
-                <Text style={pdfStyles.rowLabel}>Apport personnel</Text>
-                <Text style={pdfStyles.rowValue}>{formatCurrency(form.contribution)}</Text>
-              </View>
-              <View style={pdfStyles.row}>
-                <Text style={pdfStyles.rowLabel}>Montant emprunté</Text>
-                <Text style={pdfStyles.rowValue}>{formatCurrency(form.loanAmount)}</Text>
-              </View>
-            </>
-          ) : null}
-          <View style={pdfStyles.row}>
-            <Text style={pdfStyles.rowLabel}>Validité de l'offre</Text>
-            <Text style={pdfStyles.rowValue}>Jusqu'au {validityDate}</Text>
-          </View>
-        </View>
-
-        <View style={pdfStyles.section}>
-          <Text style={pdfStyles.sectionTitle}>Conditions suspensives</Text>
-          {conditions.length > 0 ? (
-            conditions.map((condition) => (
-              <View key={condition} style={pdfStyles.bullet}>
-                <View style={pdfStyles.bulletDot} />
-                <Text style={pdfStyles.bulletText}>{condition}</Text>
-              </View>
-            ))
-          ) : (
-            <Text style={pdfStyles.line}>Aucune condition suspensive sélectionnée.</Text>
-          )}
-        </View>
-
-        <View style={pdfStyles.signature}>
-          <View style={pdfStyles.signatureBox}>
-            <Text style={pdfStyles.signatureLabel}>Acheteur</Text>
-            <Text style={{ marginTop: 42 }}>Signature</Text>
-          </View>
-          <View style={pdfStyles.signatureBox}>
-            <Text style={pdfStyles.signatureLabel}>Acceptation vendeur</Text>
-            <Text style={{ marginTop: 42 }}>Signature</Text>
-          </View>
-        </View>
-
-        <Text style={pdfStyles.disclaimer}>
-          Document généré à titre d'aide à la rédaction. À faire valider par un professionnel si nécessaire.
-        </Text>
+        {/* FOOTER */}
         <View style={pdfStyles.footer}>
-          <Text>{documentRef}</Text>
-          <Text>Offre d'achat immobilier</Text>
+          <Text style={pdfStyles.footerText}>Offre d'achat immobilier</Text>
+          <Text style={pdfStyles.footerText}>Document non contraignant — ne remplace pas un avant-contrat</Text>
         </View>
+
       </Page>
     </Document>
   );
 };
 
+
 export default function PurchaseOfferPage() {
   const [form, setForm] = useState<OfferForm>(initialForm);
+  const [newConditionText, setNewConditionText] = useState('');
   const [isClientReady, setIsClientReady] = useState(false);
   const [documentRef, setDocumentRef] = useState('OFFRE-ACHAT');
 
@@ -466,6 +622,27 @@ export default function PurchaseOfferPage() {
     const randomPart = Math.floor(1000 + Math.random() * 9000);
     setDocumentRef(`OFFRE-${datePart}-${randomPart}`);
     setIsClientReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const saved = localStorage.getItem('lastAnalysis');
+      if (!saved) return;
+      const data = JSON.parse(saved) as { purchasePrice?: string; city?: string; propertyType?: string };
+      const typeMap: Record<string, string> = {
+        apartment: 'Appartement',
+        house: 'Maison',
+        building: 'Immeuble',
+      };
+      setForm((prev) => ({
+        ...prev,
+        listedPrice: data.purchasePrice || prev.listedPrice,
+        offerPrice: data.purchasePrice || prev.offerPrice,
+        propertyType: (data.propertyType && typeMap[data.propertyType]) ? typeMap[data.propertyType] : prev.propertyType,
+        propertyAddress: data.city ? data.city : prev.propertyAddress,
+      }));
+    } catch {}
   }, []);
 
   const fileName = useMemo(() => {
@@ -538,7 +715,7 @@ export default function PurchaseOfferPage() {
   const inputStyle = {
     marginTop: '6px',
     padding: '13px 12px',
-    borderRadius: '10px',
+    borderRadius: '8px',
     border: '1px solid #e5e7eb',
     backgroundColor: '#fbfcfd',
     color: '#111827',
@@ -557,10 +734,10 @@ export default function PurchaseOfferPage() {
 
   const cardStyle = {
     padding: '16px',
-    borderRadius: '14px',
+    borderRadius: '12px',
     backgroundColor: '#ffffff',
     border: '1px solid rgba(226, 232, 240, 0.9)',
-    boxShadow: '0 10px 30px rgba(15, 23, 42, 0.06)',
+    boxShadow: '0 1px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)',
   } as const;
 
   const sectionTitleStyle = {
@@ -594,10 +771,10 @@ export default function PurchaseOfferPage() {
         <header
           style={{
             padding: '18px',
-            borderRadius: '18px',
+            borderRadius: '16px',
             background: 'linear-gradient(145deg, #0f172a 0%, #1f2937 100%)',
             color: '#ffffff',
-            boxShadow: '0 18px 40px rgba(15, 23, 42, 0.22)',
+            boxShadow: '0 1px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)',
           }}
         >
           <div
@@ -654,10 +831,46 @@ export default function PurchaseOfferPage() {
               Adresse du bien
               <input value={form.propertyAddress} onChange={(event) => updateField('propertyAddress', event.target.value)} style={inputStyle} />
             </label>
-            <label style={labelStyle}>
+            <div style={labelStyle}>
               Type
-              <input value={form.propertyType} onChange={(event) => updateField('propertyType', event.target.value)} style={inputStyle} />
-            </label>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr 1fr',
+                  gap: '6px',
+                  marginTop: '6px',
+                  padding: '4px',
+                  borderRadius: '8px',
+                  backgroundColor: '#f3f4f6',
+                  border: '1px solid #e5e7eb',
+                }}
+              >
+                {['Appartement', 'Maison', 'Immeuble'].map((option) => {
+                  const isSelected = form.propertyType === option;
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => updateField('propertyType', option)}
+                      style={{
+                        minHeight: '40px',
+                        padding: '8px 4px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        backgroundColor: isSelected ? '#ffffff' : 'transparent',
+                        color: isSelected ? '#111827' : '#6b7280',
+                        fontSize: '12px',
+                        fontWeight: 800,
+                        boxShadow: isSelected ? '0 1px 4px rgba(15, 23, 42, 0.10)' : 'none',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {option}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <label style={labelStyle}>
                 Prix affiché
@@ -680,7 +893,7 @@ export default function PurchaseOfferPage() {
                 gridTemplateColumns: '1fr 1fr',
                 gap: '6px',
                 padding: '4px',
-                borderRadius: '10px',
+                borderRadius: '8px',
                 backgroundColor: '#f3f4f6',
                 border: '1px solid #e5e7eb',
               }}
@@ -714,16 +927,27 @@ export default function PurchaseOfferPage() {
               })}
             </div>
             {form.financingType === 'loan' ? (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <label style={labelStyle}>
+                    Apport
+                    <input type="number" min="0" value={form.contribution} onChange={(event) => handleContributionChange(event.target.value)} style={inputStyle} />
+                  </label>
+                  <label style={labelStyle}>
+                    Emprunt
+                    <input type="number" min="0" value={form.loanAmount} onChange={(event) => handleLoanAmountChange(event.target.value)} style={inputStyle} />
+                  </label>
+                </div>
                 <label style={labelStyle}>
-                  Apport
-                  <input type="number" min="0" value={form.contribution} onChange={(event) => handleContributionChange(event.target.value)} style={inputStyle} />
+                  Accord de principe bancaire (facultatif)
+                  <input
+                    value={form.loanPreApprovalBank}
+                    onChange={(event) => updateField('loanPreApprovalBank', event.target.value)}
+                    placeholder="Ex : Crédit Agricole, BNP..."
+                    style={inputStyle}
+                  />
                 </label>
-                <label style={labelStyle}>
-                  Emprunt
-                  <input type="number" min="0" value={form.loanAmount} onChange={(event) => handleLoanAmountChange(event.target.value)} style={inputStyle} />
-                </label>
-              </div>
+              </>
             ) : null}
           </div>
         </div>
@@ -732,32 +956,92 @@ export default function PurchaseOfferPage() {
           <div style={sectionTitleStyle}>Offre</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '11px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              <label style={labelStyle}>
-                Validité
-                <input type="number" min="1" value={form.offerValidityDays} onChange={(event) => updateField('offerValidityDays', event.target.value)} style={inputStyle} />
-              </label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <label style={labelStyle}>
+                  Validité
+                  <input type="number" min="1" value={form.offerValidityDays} onChange={(event) => updateField('offerValidityDays', event.target.value)} style={inputStyle} />
+                </label>
+                <span style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px', fontWeight: 600 }}>7 à 14 jours est la durée habituelle</span>
+              </div>
               <label style={labelStyle}>
                 Ville signature
                 <input value={form.cityOfSignature} onChange={(event) => updateField('cityOfSignature', event.target.value)} style={inputStyle} />
               </label>
             </div>
-            {[
-              ['loanApproval', 'Obtention du financement'],
-              ['satisfactoryDiagnostics', 'Diagnostics satisfaisants'],
-              ['satisfactoryCoownershipDocuments', 'Documents de copropriété satisfaisants'],
-              ['noMajorUndisclosedWorks', 'Aucun gros travaux non communiqué'],
-              ['noLegalOrAdministrativeIssue', 'Aucun problème juridique ou administratif'],
-            ].map(([key, label]) => (
-              <label key={key} style={{ display: 'flex', gap: '9px', alignItems: 'center', fontSize: '14px', color: '#374151' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div>
+                <div style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a', marginBottom: '4px' }}>
+                  Conditions suspensives
+                </div>
+                <div style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5 }}>
+                  Ce sont les conditions qui doivent être remplies pour que la vente se concrétise.
+                  Si une condition n'est pas remplie, vous pouvez annuler l'offre sans pénalité.
+                  Cochez celles qui s'appliquent à votre situation.
+                </div>
+              </div>
+              {[
+                ['loanApproval', "Obtention du financement", "Votre banque doit accepter votre prêt immobilier"],
+                ['satisfactoryDiagnostics', 'Diagnostics satisfaisants', "Les diagnostics (amiante, plomb, DPE…) ne révèlent rien de grave"],
+                ['satisfactoryCoownershipDocuments', 'Documents de copropriété satisfaisants', "Pour un appartement : les PV d'AG et bilans de charges sont corrects"],
+                ['noMajorUndisclosedWorks', 'Aucun gros travaux non communiqué', "Le vendeur n'a pas caché de travaux importants à prévoir"],
+                ['noLegalOrAdministrativeIssue', 'Aucun problème juridique ou administratif', "Pas de litige, servitude cachée ou problème d'urbanisme"],
+              ].map(([key, label, hint]) => (
+                <label key={key} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', cursor: 'pointer', padding: '10px 12px', borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                  <input
+                    type="checkbox"
+                    checked={Boolean(form[key as keyof OfferForm])}
+                    onChange={(event) => updateField(key as keyof OfferForm, event.target.checked as never)}
+                    style={{ width: '17px', height: '17px', marginTop: '2px', flexShrink: 0, accentColor: '#16a34a' }}
+                  />
+                  <div>
+                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a' }}>{label}</div>
+                    <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>{hint}</div>
+                  </div>
+                </label>
+              ))}
+              {form.customConditions.map((cond, idx) => (
+                <div key={idx} style={{ display: 'flex', gap: '10px', alignItems: 'center', padding: '10px 12px', borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                  <div style={{ width: '17px', height: '17px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#16a34a"/><path d="M4 7l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </div>
+                  <div style={{ flex: 1, fontSize: '14px', fontWeight: 700, color: '#0f172a' }}>{cond}</div>
+                  <button
+                    type="button"
+                    onClick={() => updateField('customConditions', form.customConditions.filter((_, i) => i !== idx))}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', color: '#94a3b8', fontSize: '16px', lineHeight: 1 }}
+                  >
+                    x
+                  </button>
+                </div>
+              ))}
+              <div style={{ display: 'flex', gap: '8px' }}>
                 <input
-                  type="checkbox"
-                  checked={Boolean(form[key as keyof OfferForm])}
-                  onChange={(event) => updateField(key as keyof OfferForm, event.target.checked as never)}
-                  style={{ width: '17px', height: '17px' }}
+                  type="text"
+                  placeholder="Ajouter une condition personnalisée…"
+                  value={newConditionText}
+                  onChange={(e) => setNewConditionText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && newConditionText.trim()) {
+                      updateField('customConditions', [...form.customConditions, newConditionText.trim()]);
+                      setNewConditionText('');
+                    }
+                  }}
+                  style={{ ...inputStyle, flex: 1, margin: 0 }}
                 />
-                {label}
-              </label>
-            ))}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (newConditionText.trim()) {
+                      updateField('customConditions', [...form.customConditions, newConditionText.trim()]);
+                      setNewConditionText('');
+                    }
+                  }}
+                  style={{ padding: '0 16px', borderRadius: '8px', border: 'none', backgroundColor: '#0f172a', color: '#ffffff', fontSize: '14px', fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                >
+                  + Ajouter
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -779,7 +1063,7 @@ export default function PurchaseOfferPage() {
                   fontSize: '16px',
                   fontWeight: 800,
                   cursor: 'pointer',
-                  boxShadow: '0 14px 28px rgba(17, 24, 39, 0.22)',
+                  boxShadow: '0 4px 16px rgba(17, 24, 39, 0.12)',
                 }}
               >
                 {loading ? 'Préparation du PDF...' : "Générer l'offre en PDF"}
@@ -823,35 +1107,43 @@ export default function PurchaseOfferPage() {
           maxWidth: '430px',
           zIndex: 30,
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1fr',
+          gridTemplateColumns: '1fr 1fr 1fr 1fr',
           gap: '6px',
           padding: '7px',
-          borderRadius: '22px',
+          borderRadius: '20px',
           backgroundColor: 'rgba(255, 255, 255, 0.92)',
           border: '1px solid rgba(203, 213, 225, 0.75)',
-          boxShadow: '0 18px 45px rgba(15, 23, 42, 0.18)',
+          boxShadow: '0 1px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)',
           backdropFilter: 'blur(16px)',
         }}
       >
         {[
-          { href: '/analyse', label: 'Analyse', active: false },
-          { href: '/offre', label: 'Offre', active: true },
-          { href: '/copro', label: 'Copro', active: false },
+          { href: '/analyse', label: 'Analyse', active: false, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></> },
+          { href: '/offre', label: 'Offre', active: true, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></> },
+          { href: '/copro', label: 'Copro', active: false, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></> },
+          { href: '/mes-analyses', label: 'Historique', active: false, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></> },
         ].map((item) => (
           <a
             key={item.label}
             href={item.href}
             style={{
-              padding: '11px 8px',
+              padding: '8px 4px 6px',
               borderRadius: '16px',
               backgroundColor: item.active ? '#0f172a' : 'transparent',
               color: item.active ? '#ffffff' : '#64748b',
               textAlign: 'center',
               textDecoration: 'none',
-              fontSize: '13px',
-              fontWeight: 850,
+              fontSize: '11px',
+              fontWeight: 700,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '3px',
             }}
           >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              {item.icon}
+            </svg>
             {item.label}
           </a>
         ))}

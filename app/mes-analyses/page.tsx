@@ -97,6 +97,9 @@ export default function MesAnalysesPage() {
   }, []);
 
   const deleteAnalysis = async (id: string) => {
+    const confirmed = window.confirm('Supprimer cette analyse ? Cette action est irréversible.');
+    if (!confirmed) return;
+
     const { error: deleteError } = await supabase.from('analyses').delete().eq('id', id);
 
     if (deleteError) {
@@ -129,7 +132,7 @@ export default function MesAnalysesPage() {
     }
 
     if (!nextTitle) {
-      setError('Le nom de l’analyse ne peut pas être vide.');
+      setError("Le nom de l'analyse ne peut pas être vide.");
       return;
     }
 
@@ -159,10 +162,10 @@ export default function MesAnalysesPage() {
 
   const cardStyle = {
     padding: '16px',
-    borderRadius: '14px',
+    borderRadius: '12px',
     backgroundColor: '#ffffff',
     border: '1px solid rgba(226, 232, 240, 0.9)',
-    boxShadow: '0 10px 30px rgba(15, 23, 42, 0.06)',
+    boxShadow: '0 1px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)',
   } as const;
 
   return (
@@ -181,16 +184,16 @@ export default function MesAnalysesPage() {
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
-          paddingBottom: '32px',
+          paddingBottom: '132px',
         }}
       >
         <header
           style={{
             padding: '18px',
-            borderRadius: '18px',
+            borderRadius: '16px',
             background: 'linear-gradient(145deg, #0f172a 0%, #1f2937 100%)',
             color: '#ffffff',
-            boxShadow: '0 18px 40px rgba(15, 23, 42, 0.22)',
+            boxShadow: '0 1px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)',
           }}
         >
           <div style={{ fontSize: '11px', fontWeight: 850, color: '#dbeafe', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
@@ -204,27 +207,44 @@ export default function MesAnalysesPage() {
           </p>
         </header>
 
-        <Link
-          href="/analyse"
-          style={{
-            alignSelf: 'flex-start',
-            color: '#475569',
-            textDecoration: 'none',
-            fontSize: '14px',
-            fontWeight: 800,
-            padding: '4px 2px',
-          }}
-        >
-          ← Retour
-        </Link>
-
         {isLoading && <div style={{ ...cardStyle, color: '#64748b', fontSize: '14px', fontWeight: 700 }}>Chargement...</div>}
 
         {error && <div style={{ ...cardStyle, color: '#dc2626', fontSize: '14px', fontWeight: 700 }}>{error}</div>}
 
         {!isLoading && analyses.length === 0 && (
-          <div style={{ ...cardStyle, color: '#64748b', fontSize: '14px', lineHeight: 1.45 }}>
-            Aucune analyse enregistrée pour le moment.
+          <div
+            style={{
+              ...cardStyle,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '32px 24px',
+              textAlign: 'center',
+            }}
+          >
+            <div style={{ fontSize: '36px' }}>🏠</div>
+            <div style={{ fontSize: '16px', fontWeight: 800, color: '#111827' }}>
+              Aucune analyse enregistrée
+            </div>
+            <div style={{ fontSize: '14px', color: '#64748b', lineHeight: 1.5 }}>
+              Analyse ta première propriété et sauvegarde le résultat pour le retrouver ici.
+            </div>
+            <Link
+              href="/analyse"
+              style={{
+                marginTop: '4px',
+                padding: '12px 20px',
+                borderRadius: '8px',
+                backgroundColor: '#111827',
+                color: '#ffffff',
+                fontSize: '14px',
+                fontWeight: 800,
+                textDecoration: 'none',
+              }}
+            >
+              Analyser une propriété
+            </Link>
           </div>
         )}
 
@@ -249,7 +269,7 @@ export default function MesAnalysesPage() {
                     style={{
                       width: '100%',
                       padding: '9px 10px',
-                      borderRadius: '10px',
+                      borderRadius: '8px',
                       border: '1px solid #cbd5e1',
                       color: '#111827',
                       fontSize: '15px',
@@ -297,7 +317,7 @@ export default function MesAnalysesPage() {
                   onClick={() => setSelectedAnalysis((current) => (current?.id === analysis.id ? null : analysis))}
                   style={{
                     padding: '10px',
-                    borderRadius: '10px',
+                    borderRadius: '8px',
                     border: 'none',
                     backgroundColor: '#111827',
                     color: '#ffffff',
@@ -312,7 +332,7 @@ export default function MesAnalysesPage() {
                   href="/offre"
                   style={{
                     padding: '10px',
-                    borderRadius: '10px',
+                    borderRadius: '8px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
                     color: '#111827',
@@ -332,7 +352,7 @@ export default function MesAnalysesPage() {
                   style={{
                     width: '100%',
                     padding: '10px',
-                    borderRadius: '10px',
+                    borderRadius: '8px',
                     border: '1px solid #fecaca',
                     backgroundColor: '#fef2f2',
                     color: '#b91c1c',
@@ -393,6 +413,57 @@ export default function MesAnalysesPage() {
           </div>
         )}
       </section>
+      <nav
+        style={{
+          position: 'fixed',
+          left: '50%',
+          bottom: '12px',
+          transform: 'translateX(-50%)',
+          width: 'calc(100% - 24px)',
+          maxWidth: '430px',
+          zIndex: 30,
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr 1fr 1fr',
+          gap: '6px',
+          padding: '7px',
+          borderRadius: '20px',
+          backgroundColor: 'rgba(255, 255, 255, 0.92)',
+          border: '1px solid rgba(203, 213, 225, 0.75)',
+          boxShadow: '0 1px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)',
+          backdropFilter: 'blur(16px)',
+        }}
+      >
+        {[
+          { href: '/analyse', label: 'Analyse', active: false, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></> },
+          { href: '/offre', label: 'Offre', active: false, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></> },
+          { href: '/copro', label: 'Copro', active: false, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></> },
+          { href: '/mes-analyses', label: 'Historique', active: true, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></> },
+        ].map((item) => (
+          <a
+            key={item.label}
+            href={item.href}
+            style={{
+              padding: '8px 4px 6px',
+              borderRadius: '16px',
+              backgroundColor: item.active ? '#0f172a' : 'transparent',
+              color: item.active ? '#ffffff' : '#64748b',
+              textAlign: 'center',
+              textDecoration: 'none',
+              fontSize: '11px',
+              fontWeight: 700,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '3px',
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              {item.icon}
+            </svg>
+            {item.label}
+          </a>
+        ))}
+      </nav>
     </main>
   );
 }
