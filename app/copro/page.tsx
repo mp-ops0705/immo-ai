@@ -194,7 +194,7 @@ export default function CoproPage() {
             >
               <span>Ajouter PDF ou images</span>
               <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>
-                PV d\'AG, budget, travaux, diagnostics ou pages scannées
+                PV d'AG, budget, travaux, diagnostics ou pages scannées
               </span>
               <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 600 }}>
                 PDF, JPEG, PNG, WebP — 10 Mo max par fichier

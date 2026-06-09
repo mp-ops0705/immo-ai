@@ -429,109 +429,109 @@ export default function MesAnalysesPage() {
                 Enregistrement du nom...
               </div>
             )}
+
+            {selectedAnalysis?.id === analysis.id && (
+              <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #eef2f7', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 850, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                  Détail enregistré
+                </div>
+                <div style={{ fontSize: '14px', color: '#334155', lineHeight: 1.45, fontWeight: 650 }}>
+                  {analysis.analysis_text || analysis.raw_result?.insight || 'Analyse enregistrée.'}
+                </div>
+                {[
+                  ['Score', `${analysis.raw_result?.score ?? analysis.score ?? '--'}/10`],
+                  ['Loyer retenu', formatCurrency(analysis.raw_result?.effectiveRent ?? analysis.effective_rent)],
+                  ['Rendement brut', formatPercent(analysis.raw_result?.grossYield ?? analysis.gross_yield)],
+                  ['Rendement net', formatPercent(analysis.raw_result?.netYield)],
+                  ['Cashflow', formatCurrency(analysis.raw_result?.monthlyCashflow ?? analysis.monthly_cashflow)],
+                  ['Cashflow réel', formatCurrency(analysis.raw_result?.realCashflow ?? analysis.real_cashflow)],
+                  ['Mensualité', formatCurrency(analysis.raw_result?.monthlyPayment ?? analysis.monthly_payment)],
+                  ['Charges/mois', formatCurrency(analysis.raw_result?.monthlyCharges ?? analysis.monthly_charges)],
+                  ['Investissement', formatCurrency(analysis.raw_result?.totalInvestment)],
+                  ['Financé', formatCurrency(analysis.raw_result?.loanAmount)],
+                  ['Prix max 8% brut', formatCurrency(analysis.raw_result?.targetPriceGross8)],
+                  ['Prix max cashflow neutre', formatCurrency(analysis.raw_result?.targetPriceBreakEven)],
+                ].map(([label, value]) => (
+                  <div
+                    key={label}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      gap: '12px',
+                      paddingBottom: '8px',
+                      borderBottom: '1px solid #eef2f7',
+                      fontSize: '13px',
+                      color: '#475569',
+                    }}
+                  >
+                    <span>{label}</span>
+                    <strong style={{ color: '#0f172a', textAlign: 'right' }}>{value}</strong>
+                  </div>
+                ))}
+                {(() => {
+                  const effectiveRent = analysis.raw_result?.effectiveRent ?? analysis.effective_rent ?? 0;
+                  const realCashflow = analysis.raw_result?.realCashflow ?? analysis.real_cashflow ?? 0;
+                  const annualRent = effectiveRent * 12;
+                  const taxRate = tmi / 100 + 0.172;
+                  const foncierTax = annualRent * 0.70 * taxRate;
+                  const bicTax = annualRent * 0.50 * taxRate;
+                  const foncierNet = realCashflow - foncierTax / 12;
+                  const bicNet = realCashflow - bicTax / 12;
+                  const bicIsBetter = bicNet > foncierNet;
+                  const fmt = (v: number) => (v < 0 ? '- ' : '') + Math.abs(Math.round(v)).toLocaleString('fr-FR') + ' EUR';
+                  return (
+                    <div style={{ marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingTop: '8px', borderTop: '1px solid #eef2f7' }}>
+                        <div style={{ fontSize: '10px', fontWeight: 800, color: '#64748b', letterSpacing: '0.06em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Fiscal TMI</div>
+                        <div style={{ flex: 1, display: 'flex', padding: '3px', borderRadius: '8px', backgroundColor: '#f3f4f6', border: '1px solid #e5e7eb' }}>
+                          {[0, 11, 30, 41, 45].map((v) => (
+                            <button
+                              key={v}
+                              type="button"
+                              onClick={() => setTmi(v)}
+                              style={{
+                                flex: 1,
+                                padding: '5px 2px',
+                                borderRadius: '6px',
+                                border: 'none',
+                                backgroundColor: tmi === v ? '#ffffff' : 'transparent',
+                                color: tmi === v ? '#111827' : '#6b7280',
+                                fontSize: '10px',
+                                fontWeight: 800,
+                                cursor: 'pointer',
+                                boxShadow: tmi === v ? '0 1px 4px rgba(15, 23, 42, 0.10)' : 'none',
+                              }}
+                            >
+                              {v}%
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                        {[
+                          { label: 'Nu · micro-foncier', net: foncierNet, tax: foncierTax, best: !bicIsBetter },
+                          { label: 'Meuble · micro-BIC', net: bicNet, tax: bicTax, best: bicIsBetter },
+                        ].map(({ label, net, tax, best }) => (
+                          <div key={label} style={{ padding: '10px', borderRadius: '8px', backgroundColor: best ? '#f0fdf4' : '#f8fafc', border: `1px solid ${best ? '#86efac' : '#e2e8f0'}` }}>
+                            <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, marginBottom: '6px' }}>{label}</div>
+                            <div style={{ fontSize: '16px', fontWeight: 900, color: net >= 0 ? '#16a34a' : '#dc2626' }}>{fmt(net)}</div>
+                            <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 600, marginTop: '1px', marginBottom: '6px' }}>net/mois apres impots</div>
+                            <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 700 }}>Impot estime</div>
+                            <div style={{ fontSize: '12px', fontWeight: 800, color: '#475569' }}>{fmt(tax)}<span style={{ fontSize: '10px', fontWeight: 600 }}>/an</span></div>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 600 }}>
+                        Calcul en regime micro — montant reel souvent inferieur grace aux deductions (interets, taxe fonciere, charges). Le LMNP au reel peut etre encore plus avantageux — consultez un comptable specialise.
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
           </div>
         ))}
 
-        {selectedAnalysis && (
-          <div style={{ ...cardStyle, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 850, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-              Détail enregistré
-            </div>
-            <div style={{ fontSize: '14px', color: '#334155', lineHeight: 1.45, fontWeight: 650 }}>
-              {selectedAnalysis.analysis_text || selectedAnalysis.raw_result?.insight || 'Analyse enregistrée.'}
-            </div>
-            {[
-              ['Score', `${selectedAnalysis.raw_result?.score ?? selectedAnalysis.score ?? '--'}/10`],
-              ['Loyer retenu', formatCurrency(selectedAnalysis.raw_result?.effectiveRent ?? selectedAnalysis.effective_rent)],
-              ['Rendement brut', formatPercent(selectedAnalysis.raw_result?.grossYield ?? selectedAnalysis.gross_yield)],
-              ['Rendement net', formatPercent(selectedAnalysis.raw_result?.netYield)],
-              ['Cashflow', formatCurrency(selectedAnalysis.raw_result?.monthlyCashflow ?? selectedAnalysis.monthly_cashflow)],
-              ['Cashflow réel', formatCurrency(selectedAnalysis.raw_result?.realCashflow ?? selectedAnalysis.real_cashflow)],
-              ['Mensualité', formatCurrency(selectedAnalysis.raw_result?.monthlyPayment ?? selectedAnalysis.monthly_payment)],
-              ['Charges/mois', formatCurrency(selectedAnalysis.raw_result?.monthlyCharges ?? selectedAnalysis.monthly_charges)],
-              ['Investissement', formatCurrency(selectedAnalysis.raw_result?.totalInvestment)],
-              ['Financé', formatCurrency(selectedAnalysis.raw_result?.loanAmount)],
-              ['Prix max 8% brut', formatCurrency(selectedAnalysis.raw_result?.targetPriceGross8)],
-              ['Prix max cashflow neutre', formatCurrency(selectedAnalysis.raw_result?.targetPriceBreakEven)],
-            ].map(([label, value]) => (
-              <div
-                key={label}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  gap: '12px',
-                  paddingBottom: '8px',
-                  borderBottom: '1px solid #eef2f7',
-                  fontSize: '13px',
-                  color: '#475569',
-                }}
-              >
-                <span>{label}</span>
-                <strong style={{ color: '#0f172a', textAlign: 'right' }}>{value}</strong>
-              </div>
-            ))}
-            {(() => {
-              const effectiveRent = selectedAnalysis.raw_result?.effectiveRent ?? selectedAnalysis.effective_rent ?? 0;
-              const realCashflow = selectedAnalysis.raw_result?.realCashflow ?? selectedAnalysis.real_cashflow ?? 0;
-              const annualRent = effectiveRent * 12;
-              const taxRate = tmi / 100 + 0.172;
-              const foncierTax = annualRent * 0.70 * taxRate;
-              const bicTax = annualRent * 0.50 * taxRate;
-              const foncierNet = realCashflow - foncierTax / 12;
-              const bicNet = realCashflow - bicTax / 12;
-              const bicIsBetter = bicNet > foncierNet;
-              const fmt = (v: number) => (v < 0 ? '- ' : '') + Math.abs(Math.round(v)).toLocaleString('fr-FR') + ' EUR';
-              return (
-                <div style={{ marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingTop: '8px', borderTop: '1px solid #eef2f7' }}>
-                    <div style={{ fontSize: '10px', fontWeight: 800, color: '#64748b', letterSpacing: '0.06em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Fiscal TMI</div>
-                    <div style={{ flex: 1, display: 'flex', padding: '3px', borderRadius: '8px', backgroundColor: '#f3f4f6', border: '1px solid #e5e7eb' }}>
-                      {[0, 11, 30, 41, 45].map((v) => (
-                        <button
-                          key={v}
-                          type="button"
-                          onClick={() => setTmi(v)}
-                          style={{
-                            flex: 1,
-                            padding: '5px 2px',
-                            borderRadius: '6px',
-                            border: 'none',
-                            backgroundColor: tmi === v ? '#ffffff' : 'transparent',
-                            color: tmi === v ? '#111827' : '#6b7280',
-                            fontSize: '10px',
-                            fontWeight: 800,
-                            cursor: 'pointer',
-                            boxShadow: tmi === v ? '0 1px 4px rgba(15, 23, 42, 0.10)' : 'none',
-                          }}
-                        >
-                          {v}%
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                    {[
-                      { label: 'Nu · micro-foncier', net: foncierNet, tax: foncierTax, best: !bicIsBetter },
-                      { label: 'Meuble · micro-BIC', net: bicNet, tax: bicTax, best: bicIsBetter },
-                    ].map(({ label, net, tax, best }) => (
-                      <div key={label} style={{ padding: '10px', borderRadius: '8px', backgroundColor: best ? '#f0fdf4' : '#f8fafc', border: `1px solid ${best ? '#86efac' : '#e2e8f0'}` }}>
-                        <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, marginBottom: '6px' }}>{label}</div>
-                        <div style={{ fontSize: '16px', fontWeight: 900, color: net >= 0 ? '#16a34a' : '#dc2626' }}>{fmt(net)}</div>
-                        <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 600, marginTop: '1px', marginBottom: '6px' }}>net/mois apres impots</div>
-                        <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 700 }}>Impot estime</div>
-                        <div style={{ fontSize: '12px', fontWeight: 800, color: '#475569' }}>{fmt(tax)}<span style={{ fontSize: '10px', fontWeight: 600 }}>/an</span></div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 600 }}>
-                    Calcul en regime micro — montant reel souvent inferieur grace aux deductions (interets, taxe fonciere, charges). Le LMNP au reel peut etre encore plus avantageux — consultez un comptable specialise.
-                  </div>
-                </div>
-              );
-            })()}
-          </div>
-        )}
       </section>
       <nav
         style={{

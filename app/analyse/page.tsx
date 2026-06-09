@@ -1611,7 +1611,7 @@ export default function AnalysePage() {
             type="submit"
             style={{
               position: 'sticky',
-              bottom: '84px',
+              bottom: 'calc(env(safe-area-inset-bottom, 0px) + 64px)',
               zIndex: 20,
               padding: '15px',
               borderRadius: '12px',
