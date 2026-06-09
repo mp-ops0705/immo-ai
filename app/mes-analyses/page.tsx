@@ -86,6 +86,7 @@ export default function MesAnalysesPage() {
     const { data, error: fetchError } = await supabase
       .from('analyses')
       .select('*')
+      .eq('user_id', sessionData.session.user.id)
       .order('created_at', { ascending: false });
 
     if (fetchError) {
@@ -222,7 +223,7 @@ export default function MesAnalysesPage() {
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
-          paddingBottom: '132px',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 132px)',
         }}
       >
         <header
@@ -536,7 +537,7 @@ export default function MesAnalysesPage() {
         style={{
           position: 'fixed',
           left: '50%',
-          bottom: '12px',
+          bottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)',
           transform: 'translateX(-50%)',
           width: 'calc(100% - 24px)',
           maxWidth: '430px',

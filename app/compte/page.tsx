@@ -120,11 +120,11 @@ export default function ComptePage() {
     { href: '/compte', label: 'Compte', active: true, icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></> },
   ];
 
-  if (isLoading) return null;
+  if (isLoading) return <main style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #e8edf5 0%, #f8fafc 260px, #f8fafc 100%)' }} />;
 
   return (
     <main style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #e8edf5 0%, #f8fafc 260px, #f8fafc 100%)', padding: '12px' }}>
-      <section style={{ width: '100%', maxWidth: '430px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingBottom: '132px' }}>
+      <section style={{ width: '100%', maxWidth: '430px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 132px)' }}>
 
         <header style={{ padding: '18px', borderRadius: '16px', background: 'linear-gradient(145deg, #0f172a 0%, #1f2937 100%)', color: '#ffffff', boxShadow: '0 1px 4px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04)' }}>
           <div style={{ fontSize: '11px', fontWeight: 850, color: '#dbeafe', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Parametres</div>
@@ -265,7 +265,7 @@ export default function ComptePage() {
 
       </section>
 
-      <nav style={{ position: 'fixed', left: '50%', bottom: '12px', transform: 'translateX(-50%)', width: 'calc(100% - 24px)', maxWidth: '430px', backgroundColor: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(12px)', borderRadius: '20px', border: '1px solid rgba(226,232,240,0.8)', boxShadow: '0 4px 16px rgba(17,24,39,0.12)', padding: '8px 4px', zIndex: 50 }}>
+      <nav style={{ position: 'fixed', left: '50%', bottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)', transform: 'translateX(-50%)', width: 'calc(100% - 24px)', maxWidth: '430px', backgroundColor: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(12px)', borderRadius: '20px', border: '1px solid rgba(226,232,240,0.8)', boxShadow: '0 4px 16px rgba(17,24,39,0.12)', padding: '8px 4px', zIndex: 50 }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: '2px' }}>
           {navItems.map(({ href, label, active, icon }) => (
             <a key={href} href={href} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', padding: '6px 4px', borderRadius: '12px', textDecoration: 'none', backgroundColor: active ? 'rgba(99,102,241,0.08)' : 'transparent' }}>

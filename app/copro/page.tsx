@@ -131,7 +131,7 @@ export default function CoproPage() {
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
-          paddingBottom: '132px',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 132px)',
         }}
       >
         <header
@@ -406,7 +406,7 @@ export default function CoproPage() {
         style={{
           position: 'fixed',
           left: '50%',
-          bottom: '12px',
+          bottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)',
           transform: 'translateX(-50%)',
           width: 'calc(100% - 24px)',
           maxWidth: '430px',
