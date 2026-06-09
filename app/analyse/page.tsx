@@ -1086,7 +1086,7 @@ export default function AnalysePage() {
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
-          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 132px)',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 72px)',
         }}
       >
         <header
@@ -1892,21 +1892,19 @@ export default function AnalysePage() {
       <nav
         style={{
           position: 'fixed',
-          left: '50%',
-          bottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)',
-          transform: 'translateX(-50%)',
-          width: 'calc(100% - 24px)',
-          maxWidth: '430px',
+          left: 0,
+          right: 0,
+          bottom: 0,
           zIndex: 30,
           display: 'grid',
           gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr',
-          gap: '6px',
-          padding: '7px',
-          borderRadius: '20px',
           backgroundColor: 'rgba(255, 255, 255, 0.92)',
-          border: '1px solid rgba(203, 213, 225, 0.75)',
-          boxShadow: '0 1px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)',
+          borderTop: '1px solid rgba(203, 213, 225, 0.6)',
           backdropFilter: 'blur(16px)',
+          paddingTop: '8px',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 6px)',
+          paddingLeft: '4px',
+          paddingRight: '4px',
         }}
       >
         {[

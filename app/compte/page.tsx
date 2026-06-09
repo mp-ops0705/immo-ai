@@ -124,7 +124,7 @@ export default function ComptePage() {
 
   return (
     <main style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #e8edf5 0%, #f8fafc 260px, #f8fafc 100%)', padding: '12px' }}>
-      <section style={{ width: '100%', maxWidth: '430px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 132px)' }}>
+      <section style={{ width: '100%', maxWidth: '430px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 72px)' }}>
 
         <header style={{ padding: '18px', borderRadius: '16px', background: 'linear-gradient(145deg, #0f172a 0%, #1f2937 100%)', color: '#ffffff', boxShadow: '0 1px 4px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04)' }}>
           <div style={{ fontSize: '11px', fontWeight: 850, color: '#dbeafe', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Parametres</div>
@@ -265,15 +265,13 @@ export default function ComptePage() {
 
       </section>
 
-      <nav style={{ position: 'fixed', left: '50%', bottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)', transform: 'translateX(-50%)', width: 'calc(100% - 24px)', maxWidth: '430px', backgroundColor: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(12px)', borderRadius: '20px', border: '1px solid rgba(226,232,240,0.8)', boxShadow: '0 4px 16px rgba(17,24,39,0.12)', padding: '8px 4px', zIndex: 50 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: '2px' }}>
+      <nav style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 30, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', backgroundColor: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(16px)', borderTop: '1px solid rgba(203,213,225,0.6)', paddingTop: '8px', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 6px)', paddingLeft: '4px', paddingRight: '4px' }}>
           {navItems.map(({ href, label, active, icon }) => (
-            <a key={href} href={href} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', padding: '6px 4px', borderRadius: '12px', textDecoration: 'none', backgroundColor: active ? 'rgba(99,102,241,0.08)' : 'transparent' }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? '#6366f1' : '#9ca3af'}>{icon}</svg>
-              <span style={{ fontSize: '10px', fontWeight: active ? 800 : 600, color: active ? '#6366f1' : '#9ca3af' }}>{label}</span>
+            <a key={href} href={href} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', padding: '8px 4px 6px', borderRadius: '12px', textDecoration: 'none', backgroundColor: active ? '#0f172a' : 'transparent' }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={active ? '#ffffff' : '#64748b'}>{icon}</svg>
+              <span style={{ fontSize: '10px', fontWeight: active ? 800 : 600, color: active ? '#ffffff' : '#64748b' }}>{label}</span>
             </a>
           ))}
-        </div>
       </nav>
     </main>
   );
