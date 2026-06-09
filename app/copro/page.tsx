@@ -131,7 +131,7 @@ export default function CoproPage() {
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
-          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 72px)',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 90px)',
         }}
       >
         <header
@@ -150,7 +150,7 @@ export default function CoproPage() {
               borderRadius: '999px',
               backgroundColor: 'rgba(255, 255, 255, 0.10)',
               color: '#dbeafe',
-              fontSize: '11px',
+              fontSize: '10px',
               fontWeight: 850,
               letterSpacing: '0.06em',
               textTransform: 'uppercase',
@@ -196,7 +196,7 @@ export default function CoproPage() {
               <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>
                 PV d\'AG, budget, travaux, diagnostics ou pages scannées
               </span>
-              <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600 }}>
+              <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 600 }}>
                 PDF, JPEG, PNG, WebP — 10 Mo max par fichier
               </span>
               <input
@@ -335,7 +335,7 @@ export default function CoproPage() {
                 color: '#ffffff',
               }}
             >
-              <div style={{ fontSize: '11px', color: '#cbd5e1', fontWeight: 850, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              <div style={{ fontSize: '10px', color: '#cbd5e1', fontWeight: 850, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                 Niveau de risque copropriété
               </div>
               <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
@@ -414,8 +414,8 @@ export default function CoproPage() {
           backgroundColor: 'rgba(255, 255, 255, 0.92)',
           borderTop: '1px solid rgba(203, 213, 225, 0.6)',
           backdropFilter: 'blur(16px)',
-          paddingTop: '8px',
-          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 6px)',
+          paddingTop: '5px',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 4px)',
           paddingLeft: '4px',
           paddingRight: '4px',
         }}
@@ -431,21 +431,21 @@ export default function CoproPage() {
             key={item.label}
             href={item.href}
             style={{
-              padding: '8px 4px 6px',
-              borderRadius: '16px',
+              padding: '5px 4px 4px',
+              borderRadius: '12px',
               backgroundColor: item.active ? '#0f172a' : 'transparent',
               color: item.active ? '#ffffff' : '#64748b',
               textAlign: 'center',
               textDecoration: 'none',
-              fontSize: '11px',
+              fontSize: '10px',
               fontWeight: 700,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '3px',
+              gap: '2px',
             }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               {item.icon}
             </svg>
             {item.label}

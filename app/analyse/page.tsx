@@ -96,8 +96,8 @@ const rentTypeLabels: Record<string, string> = {
 
 const rentReliabilityLabels: Record<string, string> = {
   deterministic: "Donnée issue de l'annonce",
-  cc_estimated: 'Estimation IA (CC sans détail)',
-  ai_fallback: 'Estimation IA',
+  cc_estimated: 'Estimation (CC sans détail)',
+  ai_fallback: 'Estimation automatique',
   default: 'Valeur par défaut',
   manual: 'Renseignée manuellement',
 };
@@ -119,7 +119,7 @@ const getRentDisplayInfo = (source: Result['rentSource']): RentDisplayInfo => {
   if (source === 'ai') {
     return {
       title: 'Loyer estimé',
-      subtitle: 'Source : estimation IA',
+      subtitle: 'Source : estimation automatique',
       subtitleStyle: { color: '#b45309' },
     };
   }
@@ -1086,7 +1086,7 @@ export default function AnalysePage() {
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
-          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 72px)',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 90px)',
         }}
       >
         <header
@@ -1106,7 +1106,7 @@ export default function AnalysePage() {
               borderRadius: '999px',
               backgroundColor: 'rgba(255, 255, 255, 0.10)',
               color: '#dbeafe',
-              fontSize: '11px',
+              fontSize: '10px',
               fontWeight: 800,
               letterSpacing: '0.06em',
               textTransform: 'uppercase',
@@ -1160,7 +1160,7 @@ export default function AnalysePage() {
               return (
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <div style={{ fontSize: '11px', color: '#cbd5e1', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '10px' }}>
+                    <div style={{ fontSize: '10px', color: '#cbd5e1', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '10px' }}>
                       Score global
                     </div>
                     <svg width="72" height="72" viewBox="0 0 72 72">
@@ -1227,7 +1227,7 @@ export default function AnalysePage() {
           return (
             <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: '#ffffff', border: '1px solid rgba(226, 232, 240, 0.9)', boxShadow: '0 1px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Fiscal · TMI</div>
+                <div style={{ fontSize: '10px', fontWeight: 800, color: '#64748b', letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Fiscal · TMI</div>
                 <div style={{ flex: 1, display: 'flex', padding: '3px', borderRadius: '8px', backgroundColor: '#f3f4f6', border: '1px solid #e5e7eb' }}>
                   {[0, 11, 30, 41, 45].map((v) => (
                     <button
@@ -1258,7 +1258,7 @@ export default function AnalysePage() {
                   { label: 'Meuble · micro-BIC', net: bicNet, tax: bicTax, best: bicIsBetter },
                 ].map(({ label, net, tax, best }) => (
                   <div key={label} style={{ padding: '12px', borderRadius: '8px', backgroundColor: best ? '#f0fdf4' : '#f8fafc', border: `1px solid ${best ? '#86efac' : '#e2e8f0'}` }}>
-                    <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 700, marginBottom: '6px' }}>{label}</div>
+                    <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, marginBottom: '6px' }}>{label}</div>
                     <div style={{ fontSize: '18px', fontWeight: 900, color: net >= 0 ? '#16a34a' : '#dc2626' }}>{fmt(net)}</div>
                     <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 600, marginTop: '1px', marginBottom: '8px' }}>net/mois apres impots</div>
                     <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 700 }}>Impot estime</div>
@@ -1267,7 +1267,7 @@ export default function AnalysePage() {
                 ))}
               </div>
 
-              <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600 }}>
+              <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 600 }}>
                 Calcul en regime micro — montant reel souvent inferieur grace aux deductions (interets, taxe fonciere, charges). Le LMNP au reel peut etre encore plus avantageux — consultez un comptable specialise.
               </div>
             </div>
@@ -1866,28 +1866,6 @@ export default function AnalysePage() {
           </div>
         )}
 
-        <a
-          href="/mes-analyses"
-          style={{
-            padding: '12px 14px',
-            borderRadius: '12px',
-            backgroundColor: '#ffffff',
-            border: '1px solid rgba(226, 232, 240, 0.95)',
-            boxShadow: '0 1px 3px rgba(15, 23, 42, 0.05)',
-            color: '#0f172a',
-            fontSize: '14px',
-            fontWeight: 800,
-            textDecoration: 'none',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: '12px',
-          }}
-        >
-          <span>Mes analyses sauvegardées</span>
-          <span style={{ color: '#64748b', fontSize: '12px', fontWeight: 800 }}>Ouvrir</span>
-        </a>
-
       </section>
       <nav
         style={{
@@ -1901,8 +1879,8 @@ export default function AnalysePage() {
           backgroundColor: 'rgba(255, 255, 255, 0.92)',
           borderTop: '1px solid rgba(203, 213, 225, 0.6)',
           backdropFilter: 'blur(16px)',
-          paddingTop: '8px',
-          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 6px)',
+          paddingTop: '5px',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 4px)',
           paddingLeft: '4px',
           paddingRight: '4px',
         }}
@@ -1918,21 +1896,21 @@ export default function AnalysePage() {
             key={item.label}
             href={item.href}
             style={{
-              padding: '8px 4px 6px',
-              borderRadius: '16px',
+              padding: '5px 4px 4px',
+              borderRadius: '12px',
               backgroundColor: item.active ? '#0f172a' : 'transparent',
               color: item.active ? '#ffffff' : '#64748b',
               textAlign: 'center',
               textDecoration: 'none',
-              fontSize: '11px',
+              fontSize: '10px',
               fontWeight: 700,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '3px',
+              gap: '2px',
             }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               {item.icon}
             </svg>
             {item.label}

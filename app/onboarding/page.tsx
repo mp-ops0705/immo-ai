@@ -7,7 +7,7 @@ const STEPS = [
   {
     emoji: '🔍',
     title: 'Analyse ton investissement',
-    description: "Renseigne le prix, la surface et le loyer estimé. L'IA calcule le rendement, le cashflow et te donne un score /10.",
+    description: "Renseigne le prix, la surface et le loyer estimé. L'app calcule le rendement, le cashflow et te donne un score /10.",
   },
   {
     emoji: '📄',
@@ -17,7 +17,7 @@ const STEPS = [
   {
     emoji: '🏢',
     title: 'Analyse la copropriété',
-    description: "Upload les PV d'AG et le budget. L'IA détecte les travaux, litiges et risques financiers pour toi.",
+    description: "Upload les PV d'AG et le budget. L'app détecte les travaux, litiges et risques financiers pour toi.",
   },
 ];
 

@@ -223,7 +223,7 @@ export default function MesAnalysesPage() {
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
-          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 72px)',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 90px)',
         }}
       >
         <header
@@ -235,7 +235,7 @@ export default function MesAnalysesPage() {
             boxShadow: '0 1px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)',
           }}
         >
-          <div style={{ fontSize: '11px', fontWeight: 850, color: '#dbeafe', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+          <div style={{ fontSize: '10px', fontWeight: 850, color: '#dbeafe', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
             Historique
           </div>
           <h1 style={{ margin: '12px 0 0', fontSize: '27px', fontWeight: 850 }}>
@@ -484,7 +484,7 @@ export default function MesAnalysesPage() {
               return (
                 <div style={{ marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingTop: '8px', borderTop: '1px solid #eef2f7' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', letterSpacing: '0.06em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Fiscal TMI</div>
+                    <div style={{ fontSize: '10px', fontWeight: 800, color: '#64748b', letterSpacing: '0.06em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Fiscal TMI</div>
                     <div style={{ flex: 1, display: 'flex', padding: '3px', borderRadius: '8px', backgroundColor: '#f3f4f6', border: '1px solid #e5e7eb' }}>
                       {[0, 11, 30, 41, 45].map((v) => (
                         <button
@@ -498,7 +498,7 @@ export default function MesAnalysesPage() {
                             border: 'none',
                             backgroundColor: tmi === v ? '#ffffff' : 'transparent',
                             color: tmi === v ? '#111827' : '#6b7280',
-                            fontSize: '11px',
+                            fontSize: '10px',
                             fontWeight: 800,
                             cursor: 'pointer',
                             boxShadow: tmi === v ? '0 1px 4px rgba(15, 23, 42, 0.10)' : 'none',
@@ -515,7 +515,7 @@ export default function MesAnalysesPage() {
                       { label: 'Meuble · micro-BIC', net: bicNet, tax: bicTax, best: bicIsBetter },
                     ].map(({ label, net, tax, best }) => (
                       <div key={label} style={{ padding: '10px', borderRadius: '8px', backgroundColor: best ? '#f0fdf4' : '#f8fafc', border: `1px solid ${best ? '#86efac' : '#e2e8f0'}` }}>
-                        <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 700, marginBottom: '6px' }}>{label}</div>
+                        <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, marginBottom: '6px' }}>{label}</div>
                         <div style={{ fontSize: '16px', fontWeight: 900, color: net >= 0 ? '#16a34a' : '#dc2626' }}>{fmt(net)}</div>
                         <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 600, marginTop: '1px', marginBottom: '6px' }}>net/mois apres impots</div>
                         <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 700 }}>Impot estime</div>
@@ -524,7 +524,7 @@ export default function MesAnalysesPage() {
                     ))}
                   </div>
 
-                  <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600 }}>
+                  <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 600 }}>
                     Calcul en regime micro — montant reel souvent inferieur grace aux deductions (interets, taxe fonciere, charges). Le LMNP au reel peut etre encore plus avantageux — consultez un comptable specialise.
                   </div>
                 </div>
@@ -545,8 +545,8 @@ export default function MesAnalysesPage() {
           backgroundColor: 'rgba(255, 255, 255, 0.92)',
           borderTop: '1px solid rgba(203, 213, 225, 0.6)',
           backdropFilter: 'blur(16px)',
-          paddingTop: '8px',
-          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 6px)',
+          paddingTop: '5px',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 4px)',
           paddingLeft: '4px',
           paddingRight: '4px',
         }}
@@ -562,21 +562,21 @@ export default function MesAnalysesPage() {
             key={item.label}
             href={item.href}
             style={{
-              padding: '8px 4px 6px',
-              borderRadius: '16px',
+              padding: '5px 4px 4px',
+              borderRadius: '12px',
               backgroundColor: item.active ? '#0f172a' : 'transparent',
               color: item.active ? '#ffffff' : '#64748b',
               textAlign: 'center',
               textDecoration: 'none',
-              fontSize: '11px',
+              fontSize: '10px',
               fontWeight: 700,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '3px',
+              gap: '2px',
             }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               {item.icon}
             </svg>
             {item.label}

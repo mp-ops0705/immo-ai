@@ -793,7 +793,7 @@ export default function PurchaseOfferPage() {
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
-          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 72px)',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 90px)',
         }}
       >
         <header
@@ -812,7 +812,7 @@ export default function PurchaseOfferPage() {
               borderRadius: '999px',
               backgroundColor: 'rgba(255, 255, 255, 0.10)',
               color: '#dbeafe',
-              fontSize: '11px',
+              fontSize: '10px',
               fontWeight: 800,
               letterSpacing: '0.06em',
               textTransform: 'uppercase',
@@ -993,7 +993,7 @@ export default function PurchaseOfferPage() {
                   Validité
                   <input type="number" min="1" value={form.offerValidityDays} onChange={(event) => updateField('offerValidityDays', event.target.value)} style={inputStyle} />
                 </label>
-                <span style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px', fontWeight: 600 }}>7 à 14 jours est la durée habituelle</span>
+                <span style={{ fontSize: '10px', color: '#94a3b8', marginTop: '2px', fontWeight: 600 }}>7 à 14 jours est la durée habituelle</span>
               </div>
               <label style={labelStyle}>
                 Ville signature
@@ -1141,8 +1141,8 @@ export default function PurchaseOfferPage() {
           backgroundColor: 'rgba(255, 255, 255, 0.92)',
           borderTop: '1px solid rgba(203, 213, 225, 0.6)',
           backdropFilter: 'blur(16px)',
-          paddingTop: '8px',
-          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 6px)',
+          paddingTop: '5px',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 4px)',
           paddingLeft: '4px',
           paddingRight: '4px',
         }}
@@ -1158,21 +1158,21 @@ export default function PurchaseOfferPage() {
             key={item.label}
             href={item.href}
             style={{
-              padding: '8px 4px 6px',
-              borderRadius: '16px',
+              padding: '5px 4px 4px',
+              borderRadius: '12px',
               backgroundColor: item.active ? '#0f172a' : 'transparent',
               color: item.active ? '#ffffff' : '#64748b',
               textAlign: 'center',
               textDecoration: 'none',
-              fontSize: '11px',
+              fontSize: '10px',
               fontWeight: 700,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '3px',
+              gap: '2px',
             }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               {item.icon}
             </svg>
             {item.label}
