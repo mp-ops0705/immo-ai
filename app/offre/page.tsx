@@ -123,7 +123,8 @@ const pdfStyles = StyleSheet.create({
   offerHeroBar: {
     backgroundColor: '#0f172a',
     paddingHorizontal: 13,
-    paddingVertical: 8,
+    paddingTop: 10,
+    paddingBottom: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -133,11 +134,13 @@ const pdfStyles = StyleSheet.create({
     color: '#94a3b8',
     textTransform: 'uppercase',
     letterSpacing: 1,
+    lineHeight: 1,
   },
   offerHeroBarAmount: {
     fontSize: 19,
     fontFamily: 'Helvetica-Bold',
     color: '#ffffff',
+    lineHeight: 1,
   },
   offerHeroDeclarationBlock: {
     paddingHorizontal: 13,
@@ -441,28 +444,28 @@ const PurchaseOfferDocument = ({ form, documentRef }: { form: OfferForm; documen
           </View>
           <View style={pdfStyles.offerHeroDeclarationBlock}>
             <Text style={pdfStyles.offerHeroDeclarationText}>
-              Je soussigne(e) {form.buyerFullName || '__________'} propose d'acquerir le bien situe a{' '}
+              Je soussigné(e) {form.buyerFullName || '__________'} propose d'acquérir le bien situé à{' '}
               {form.propertyAddress || '--'} ({form.propertyType || '--'}) au prix de{' '}
-              {formatPDFAmount(form.offerPrice)}, selon les modalites et conditions ci-dessous.
+              {formatPDFAmount(form.offerPrice)}, selon les modalités et conditions ci-dessous.
             </Text>
           </View>
 
           {/* SUMMARY CHIPS */}
           <View style={pdfStyles.summaryRow}>
             <View style={pdfStyles.summaryChip}>
-              <Text style={pdfStyles.summaryChipLabel}>Prix affiche</Text>
+              <Text style={pdfStyles.summaryChipLabel}>Prix affiché</Text>
               <Text style={pdfStyles.summaryChipValue}>{formatPDFAmount(form.listedPrice)}</Text>
             </View>
             <View style={pdfStyles.summaryChip}>
-              <Text style={pdfStyles.summaryChipLabel}>Ecart negocie</Text>
+              <Text style={pdfStyles.summaryChipLabel}>Écart négocié</Text>
               <Text style={pdfStyles.summaryChipValue}>{formatPDFAmountNumber(negotiationGap)}</Text>
               {negotiationRate !== null ? (
-                <Text style={pdfStyles.summaryChipSub}>{negotiationRate.toFixed(1)} % du prix affiche</Text>
+                <Text style={pdfStyles.summaryChipSub}>{negotiationRate.toFixed(1)} % du prix affiché</Text>
               ) : null}
             </View>
             <View style={pdfStyles.summaryChip}>
               <Text style={pdfStyles.summaryChipLabel}>Financement</Text>
-              <Text style={pdfStyles.summaryChipValue}>{form.financingType === 'cash' ? 'Comptant' : 'Credit'}</Text>
+              <Text style={pdfStyles.summaryChipValue}>{form.financingType === 'cash' ? 'Comptant' : 'Crédit'}</Text>
             </View>
           </View>
 
@@ -486,12 +489,12 @@ const PurchaseOfferDocument = ({ form, documentRef }: { form: OfferForm; documen
                   <Text style={pdfStyles.rowValue}>{form.buyerEmail || '--'}</Text>
                 </View>
                 <View style={pdfStyles.rowLast}>
-                  <Text style={pdfStyles.rowLabel}>Telephone</Text>
+                  <Text style={pdfStyles.rowLabel}>Téléphone</Text>
                   <Text style={pdfStyles.rowValue}>{form.buyerPhone || '--'}</Text>
                 </View>
                 {form.buyerCompany ? (
                   <View style={pdfStyles.row}>
-                    <Text style={pdfStyles.rowLabel}>Societe</Text>
+                    <Text style={pdfStyles.rowLabel}>Société</Text>
                     <Text style={pdfStyles.rowValue}>{form.buyerCompany}</Text>
                   </View>
                 ) : null}
@@ -500,7 +503,7 @@ const PurchaseOfferDocument = ({ form, documentRef }: { form: OfferForm; documen
 
             <View style={[pdfStyles.section, pdfStyles.col]}>
               <View style={pdfStyles.sectionHeader}>
-                <Text style={pdfStyles.sectionTitle}>Bien concerne</Text>
+                <Text style={pdfStyles.sectionTitle}>Bien concerné</Text>
               </View>
               <View style={pdfStyles.sectionBody}>
                 <View style={pdfStyles.row}>
@@ -512,7 +515,7 @@ const PurchaseOfferDocument = ({ form, documentRef }: { form: OfferForm; documen
                   <Text style={pdfStyles.rowValue}>{form.propertyAddress || '--'}</Text>
                 </View>
                 <View style={pdfStyles.row}>
-                  <Text style={pdfStyles.rowLabel}>Prix affiche</Text>
+                  <Text style={pdfStyles.rowLabel}>Prix affiché</Text>
                   <Text style={pdfStyles.rowValue}>{formatPDFAmount(form.listedPrice)}</Text>
                 </View>
                 <View style={pdfStyles.rowLast}>
@@ -526,12 +529,12 @@ const PurchaseOfferDocument = ({ form, documentRef }: { form: OfferForm; documen
           {/* MODALITES FINANCIERES */}
           <View style={pdfStyles.section}>
             <View style={pdfStyles.sectionHeader}>
-              <Text style={pdfStyles.sectionTitle}>Modalites financieres</Text>
+              <Text style={pdfStyles.sectionTitle}>Modalités financières</Text>
             </View>
             <View style={pdfStyles.sectionBody}>
               <View style={pdfStyles.row}>
                 <Text style={pdfStyles.rowLabel}>Mode de financement</Text>
-                <Text style={pdfStyles.rowValue}>{form.financingType === 'cash' ? 'Comptant' : 'Credit immobilier'}</Text>
+                <Text style={pdfStyles.rowValue}>{form.financingType === 'cash' ? 'Comptant' : 'Crédit immobilier'}</Text>
               </View>
               {form.financingType === 'loan' ? (
                 <>
@@ -540,7 +543,7 @@ const PurchaseOfferDocument = ({ form, documentRef }: { form: OfferForm; documen
                     <Text style={pdfStyles.rowValue}>{formatPDFAmount(form.contribution)}</Text>
                   </View>
                   <View style={pdfStyles.row}>
-                    <Text style={pdfStyles.rowLabel}>Montant emprunte</Text>
+                    <Text style={pdfStyles.rowLabel}>Montant emprunté</Text>
                     <Text style={pdfStyles.rowValue}>{formatPDFAmount(form.loanAmount)}</Text>
                   </View>
                   {form.loanPreApprovalBank ? (
@@ -552,7 +555,7 @@ const PurchaseOfferDocument = ({ form, documentRef }: { form: OfferForm; documen
                 </>
               ) : null}
               <View style={pdfStyles.rowLast}>
-                <Text style={pdfStyles.rowLabel}>Validite de l'offre</Text>
+                <Text style={pdfStyles.rowLabel}>Validité de l'offre</Text>
                 <Text style={pdfStyles.rowValue}>Jusqu'au {validityDate}</Text>
               </View>
             </View>
@@ -573,7 +576,7 @@ const PurchaseOfferDocument = ({ form, documentRef }: { form: OfferForm; documen
                 ))
               ) : (
                 <Text style={{ fontSize: 8.5, color: '#94a3b8', paddingVertical: 4 }}>
-                  Aucune condition suspensive selectionnee.
+                  Offre sans condition suspensive.
                 </Text>
               )}
             </View>
@@ -590,7 +593,7 @@ const PurchaseOfferDocument = ({ form, documentRef }: { form: OfferForm; documen
               </View>
             </View>
             <View style={pdfStyles.signatureBox}>
-              <Text style={pdfStyles.signatureRole}>Vendeur / Representant</Text>
+              <Text style={pdfStyles.signatureRole}>Vendeur / Représentant</Text>
               <Text style={pdfStyles.signatureName}>Acceptation de l'offre</Text>
               <Text style={pdfStyles.signatureDate}>Date : _____ / _____ / _________</Text>
               <View style={pdfStyles.signatureLine}>
@@ -602,8 +605,8 @@ const PurchaseOfferDocument = ({ form, documentRef }: { form: OfferForm; documen
           {/* DISCLAIMER */}
           <Text style={pdfStyles.disclaimer}>
             Ce document constitue une offre d'achat non contraignante (lettre d'intention). Il ne remplace pas un
-            avant-contrat signe devant notaire ou agent immobilier habilite. L'acheteur reste libre de retirer son
-            offre avant acceptation expresse du vendeur. A faire valider par un professionnel avant tout engagement.
+            avant-contrat signé devant notaire ou agent immobilier habilité. L'acheteur reste libre de retirer son
+            offre avant acceptation expresse du vendeur. À faire valider par un professionnel avant tout engagement.
           </Text>
         </View>
 
