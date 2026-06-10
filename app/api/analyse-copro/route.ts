@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import { PDFParse } from 'pdf-parse';
+import { createRequire } from 'module';
 
 export const runtime = 'nodejs';
+
+const require = createRequire(import.meta.url);
+const pdfParse = require('pdf-parse/lib/pdf-parse.js') as (buffer: Buffer) => Promise<{ text?: string }>;
 
 const MAX_TOTAL_TEXT_LENGTH = 50000;
 const MIN_READABLE_TEXT_LENGTH = 120;
@@ -65,15 +68,9 @@ const normalizePdfText = (value: string) =>
     .trim();
 
 const extractTextFromPdf = async (file: File) => {
-  const bytes = new Uint8Array(await file.arrayBuffer());
-  const parser = new PDFParse({ data: bytes });
-
-  try {
-    const result = await parser.getText();
-    return normalizePdfText(result.text ?? '');
-  } finally {
-    await parser.destroy();
-  }
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const result = await pdfParse(buffer);
+  return normalizePdfText(result.text ?? '');
 };
 
 const getFileType = (file: File) => {
