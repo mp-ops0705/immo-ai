@@ -112,7 +112,7 @@ const getRentDisplayInfo = (source: Result['rentSource']): RentDisplayInfo => {
   if (source === 'dataset') {
     return {
       title: 'Estimation marché',
-      subtitle: 'Source : données officielles nationales',
+      subtitle: 'Source : ANIL · observatoire national des loyers',
       subtitleStyle: { color: '#1d4ed8', fontWeight: 600 },
     };
   }
@@ -429,8 +429,30 @@ export default function AnalysePage() {
   const [scrapingError, setScrapingError] = useState(false);
   const [insufficientDataError, setInsufficientDataError] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
+  const [savedAnalysisId, setSavedAnalysisId] = useState<string | null>(null);
+  const [shareToken, setShareToken] = useState<string | null>(null);
+  const [shareStatus, setShareStatus] = useState<'idle' | 'sharing' | 'copied'>('idle');
   const [showAllDetails, setShowAllDetails] = useState(false);
   const [tmi, setTmi] = useState(30);
+  const [showForm, setShowForm] = useState(true);
+
+  const fillTestData = () => {
+    setPurchasePrice('220000');
+    setCity('Lyon');
+    setPropertyType('apartment');
+    setSurface('42');
+    setRooms('2');
+    setMonthlyRent('900');
+    setUnknownRent(false);
+    setWorks('0');
+    setInterestRate('3.7');
+    setLoanDuration('25');
+    setNotaryRate('8');
+    setCoproCharges('120');
+    setPropertyTax('750');
+    setHasApport(true);
+    setApport('25000');
+  };
   const [openTooltip, setOpenTooltip] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState('');
   const [marketRent, setMarketRent] = useState<MarketRent>({
@@ -476,6 +498,28 @@ export default function AnalysePage() {
       isMounted = false;
     };
   }, [router]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('analyseResult');
+      if (saved) {
+        try {
+          setResult(JSON.parse(saved));
+          setShowForm(false);
+        } catch { sessionStorage.removeItem('analyseResult'); }
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (result) {
+        try { sessionStorage.setItem('analyseResult', JSON.stringify(result)); } catch {}
+      } else {
+        sessionStorage.removeItem('analyseResult');
+      }
+    }
+  }, [result]);
 
   useEffect(() => {
     if (result && scoreCardRef.current) {
@@ -826,6 +870,7 @@ export default function AnalysePage() {
       marketRentLow: apiAnalysis?.marketRentLow ?? null,
       marketRentHigh: apiAnalysis?.marketRentHigh ?? null,
     });
+    setShowForm(false);
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -952,6 +997,7 @@ export default function AnalysePage() {
       marketRentLow: marketRent.marketRentLow,
       marketRentHigh: marketRent.marketRentHigh,
     });
+    setShowForm(false);
 
     if (typeof window !== 'undefined') {
       try {
@@ -984,7 +1030,7 @@ export default function AnalysePage() {
     const roomsValue = parseFloat(rooms);
     const title = city.trim() ? `Analyse ${city.trim()}` : 'Analyse immobilière';
 
-    const { error } = await supabase.from('analyses').insert({
+    const { data: insertedRow, error } = await supabase.from('analyses').insert({
       user_id: userData.user.id,
       title,
       city: city.trim() || null,
@@ -1005,7 +1051,7 @@ export default function AnalysePage() {
       score: result.score,
       analysis_text: result.insight,
       raw_result: result,
-    });
+    }).select('id').single();
 
     if (error) {
       setSaveStatus('error');
@@ -1013,8 +1059,65 @@ export default function AnalysePage() {
       return;
     }
 
+    if (insertedRow?.id) setSavedAnalysisId(insertedRow.id);
     setSaveStatus('success');
     setSaveMessage('Analyse enregistrée.');
+  };
+
+  const handleShareAnalysis = async () => {
+    if (!result) return;
+    setShareStatus('sharing');
+    try {
+      let analysisId = savedAnalysisId;
+      let token = shareToken;
+
+      if (!analysisId) {
+        const { data: userData } = await supabase.auth.getUser();
+        if (!userData.user) { setShareStatus('idle'); return; }
+        const purchaseValue = parseFloat(purchasePrice);
+        const surfaceValue = parseFloat(surface);
+        const roomsValue = parseFloat(rooms);
+        const title = city.trim() ? `Analyse ${city.trim()}` : 'Analyse immobiliere';
+        const { data: row, error } = await supabase.from('analyses').insert({
+          user_id: userData.user.id, title, city: city.trim() || null,
+          property_type: propertyType,
+          surface: Number.isNaN(surfaceValue) ? null : surfaceValue,
+          rooms: Number.isNaN(roomsValue) ? null : roomsValue,
+          purchase_price: Number.isNaN(purchaseValue) ? null : purchaseValue,
+          effective_rent: result.effectiveRent, gross_yield: result.grossYield,
+          real_cashflow: result.realCashflow, score: result.score,
+          analysis_text: result.insight, raw_result: result,
+        }).select('id').single();
+        if (error || !row?.id) { setShareStatus('idle'); return; }
+        analysisId = row.id;
+        setSavedAnalysisId(analysisId);
+        setSaveStatus('success');
+        setSaveMessage('Analyse enregistree.');
+      }
+
+      if (!token) {
+        token = crypto.randomUUID();
+        const { error } = await supabase.from('analyses')
+          .update({ share_token: token, share_enabled: true, shared_at: new Date().toISOString() })
+          .eq('id', analysisId);
+        if (error) { setShareStatus('idle'); return; }
+        setShareToken(token);
+      }
+
+      const url = `${window.location.origin}/partage/${token}`;
+      const title = city.trim() ? `Analyse ${city.trim()}` : 'Analyse immobiliere';
+      const nav = navigator as Navigator & { share?: (data: ShareData) => Promise<void> };
+      if (nav.share) {
+        await nav.share({ title, text: `Mon analyse immo.ai : ${title}`, url });
+        setShareStatus('idle');
+      } else {
+        await navigator.clipboard.writeText(url);
+        setShareStatus('copied');
+        setTimeout(() => setShareStatus('idle'), 2500);
+      }
+    } catch {
+      setShareStatus('idle');
+    }
   };
 
   const inputStyle = {
@@ -1093,8 +1196,8 @@ export default function AnalysePage() {
           <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '120px', height: '120px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%)' }} />
           <div style={{ position: 'absolute', bottom: '-30px', left: '40px', width: '80px', height: '80px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%)' }} />
           <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Analyse</div>
-          <h1 style={{ margin: '6px 0 0', fontSize: '24px', fontWeight: 900, letterSpacing: '-0.02em' }}>Analyse locative</h1>
-          <p style={{ margin: '5px 0 0', fontSize: '13px', color: '#64748b', lineHeight: 1.5 }}>Rendement, cashflow et marche locatif en une lecture.</p>
+          <h1 style={{ margin: '6px 0 0', fontSize: '24px', fontWeight: 900, letterSpacing: '-0.02em' }}>Analyser un bien locatif</h1>
+          <p style={{ margin: '5px 0 0', fontSize: '13px', color: '#64748b', lineHeight: 1.5 }}>Calculez le rendement, le cashflow et la rentabilité avant d'acheter.</p>
         </header>
 
         {result && (
@@ -1174,10 +1277,11 @@ export default function AnalysePage() {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <div style={{ padding: '12px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.09)', border: '1px solid rgba(255, 255, 255, 0.10)' }}>
-                <div style={{ fontSize: '12px', color: '#cbd5e1', fontWeight: 700 }}>Cashflow réel</div>
+                <div style={{ fontSize: '12px', color: '#cbd5e1', fontWeight: 700 }}>Cashflow mensuel</div>
                 <div style={{ marginTop: '5px', fontSize: '20px', fontWeight: 900, color: result.realCashflow >= 0 ? '#86efac' : '#fca5a5' }}>
                   {formatCurrency(result.realCashflow)}
                 </div>
+                <div style={{ marginTop: '4px', fontSize: '10px', color: 'rgba(203,213,225,0.55)', fontWeight: 500, lineHeight: 1.45 }}>Ce qui rentre ou sort de votre poche chaque mois, une fois le crédit et les charges payés.</div>
               </div>
               <div style={{ padding: '12px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.09)', border: '1px solid rgba(255, 255, 255, 0.10)' }}>
                 <div style={{ fontSize: '12px', color: '#cbd5e1', fontWeight: 700 }}>Rendement net</div>
@@ -1201,8 +1305,12 @@ export default function AnalysePage() {
           const fmt = (v: number) => (v < 0 ? '- ' : '') + Math.abs(Math.round(v)).toLocaleString('fr-FR') + ' €';
           return (
             <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: '#ffffff', border: '1px solid rgba(226, 232, 240, 0.9)', boxShadow: '0 1px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div>
+                <div style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a', marginBottom: '2px' }}>Fiscalité de vos loyers</div>
+                <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 500 }}>Estimez l'impôt selon votre situation — sélectionnez votre tranche d'imposition.</div>
+              </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ fontSize: '10px', fontWeight: 800, color: '#64748b', letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Fiscal · TMI</div>
+                <div style={{ fontSize: '10px', fontWeight: 800, color: '#64748b', letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>TMI</div>
                 <div style={{ flex: 1, display: 'flex', padding: '3px', borderRadius: '8px', backgroundColor: '#f3f4f6', border: '1px solid #e5e7eb' }}>
                   {[0, 11, 30, 41, 45].map((v) => (
                     <button
@@ -1229,13 +1337,14 @@ export default function AnalysePage() {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                 {[
-                  { label: 'Nu · micro-foncier', net: foncierNet, tax: foncierTax, best: !bicIsBetter },
-                  { label: 'Meuble · micro-BIC', net: bicNet, tax: bicTax, best: bicIsBetter },
-                ].map(({ label, net, tax, best }) => (
+                  { label: 'Location nue', sub: 'Régime micro-foncier', net: foncierNet, tax: foncierTax, best: !bicIsBetter },
+                  { label: 'Location meublée', sub: 'Régime micro-BIC · LMNP', net: bicNet, tax: bicTax, best: bicIsBetter },
+                ].map(({ label, sub, net, tax, best }) => (
                   <div key={label} style={{ padding: '12px', borderRadius: '8px', backgroundColor: best ? '#f0fdf4' : '#f8fafc', border: `1px solid ${best ? '#86efac' : '#e2e8f0'}` }}>
-                    <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, marginBottom: '6px' }}>{label}</div>
+                    <div style={{ fontSize: '12px', color: '#0f172a', fontWeight: 800, marginBottom: '1px' }}>{label}</div>
+                    <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 600, marginBottom: '8px' }}>{sub}</div>
                     <div style={{ fontSize: '18px', fontWeight: 900, color: net >= 0 ? '#16a34a' : '#dc2626' }}>{fmt(net)}</div>
-                    <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 600, marginTop: '1px', marginBottom: '8px' }}>net/mois apres impots</div>
+                    <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 600, marginTop: '1px', marginBottom: '8px' }}>net / mois apres impots</div>
                     <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 700 }}>Impot estime</div>
                     <div style={{ fontSize: '13px', fontWeight: 800, color: '#475569' }}>{fmt(tax)}<span style={{ fontSize: '10px', fontWeight: 600 }}>/an</span></div>
                   </div>
@@ -1243,13 +1352,14 @@ export default function AnalysePage() {
               </div>
 
               <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 600 }}>
-                Calcul en regime micro — montant reel souvent inferieur grace aux deductions (interets, taxe fonciere, charges). Le LMNP au reel peut etre encore plus avantageux — consultez un comptable specialise.
+                Ces chiffres sont des estimations basées sur un abattement forfaitaire (régime simplifié). Si vous déduisez vos vraies charges — intérêts du crédit, taxe foncière, travaux — l'impôt sera probablement encore plus faible. En optant pour le régime LMNP au réel, l'impôt généré par vos revenus locatifs peut être considérablement réduit, voire ramené à zéro. Un comptable peut vous aider à choisir le régime le plus avantageux pour votre situation.
               </div>
             </div>
           );
         })()}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {showForm && (<>
           <div style={cardStyle}>
             <div style={sectionTitleStyle}>Bien</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '11px' }}>
@@ -1270,7 +1380,10 @@ export default function AnalysePage() {
                   type="text"
                   list="anil-city-suggestions"
                   value={city}
-                  onChange={(event) => setCity(event.target.value)}
+                  onChange={(event) => {
+                    const v = event.target.value;
+                    if (v === 'test') { fillTestData(); } else { setCity(v); }
+                  }}
                   placeholder="Nantes"
                   style={inputStyle}
                 />
@@ -1389,15 +1502,25 @@ export default function AnalysePage() {
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'baseline' }}>
                   <span style={{ fontSize: '13px', color: '#1e40af', fontWeight: 700 }}>
-                    {unknownRent ? 'Loyer utilisé' : 'Loyer marché'}
+                    {unknownRent ? 'Loyer utilisé' : 'Loyer marché moyen'}
                   </span>
                   <strong style={{ fontSize: '17px', color: '#1e3a8a' }}>
                     {marketRent.marketRentAvg ? formatCurrency(marketRent.marketRentAvg) : '--'}
                   </strong>
                 </div>
-                <div style={{ marginTop: '3px', fontSize: '12px', color: '#2563eb' }}>
-                  Données officielles nationales
+                <div style={{ marginTop: '4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <span style={{ fontSize: '12px', color: '#2563eb', fontWeight: 600 }}>Données officielles nationales · ANIL</span>
+                  <button
+                    type="button"
+                    onClick={() => setOpenTooltip(openTooltip === 'anil-source' ? null : 'anil-source')}
+                    style={{ border: 'none', background: 'none', padding: '0 2px', cursor: 'pointer', fontSize: '11px', color: '#93c5fd', lineHeight: 1, fontWeight: 800 }}
+                  >i</button>
                 </div>
+                {openTooltip === 'anil-source' && (
+                  <div style={{ marginTop: '6px', padding: '8px 10px', borderRadius: '8px', backgroundColor: '#dbeafe', border: '1px solid #bfdbfe', fontSize: '11px', color: '#1e40af', lineHeight: 1.5, fontWeight: 500 }}>
+                    Données issues de l'ANIL (Agence Nationale pour l'Information sur le Logement). Loyers de référence nationaux calculés selon la ville et la surface du bien — fourchette basse, moyenne et haute.
+                  </div>
+                )}
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <label style={labelStyle}>
@@ -1582,32 +1705,30 @@ export default function AnalysePage() {
             )}
           </div>
 
-          <button
-            type="submit"
-            style={{
-              position: 'sticky',
-              bottom: 'calc(env(safe-area-inset-bottom, 0px) + 64px)',
-              zIndex: 20,
-              padding: '15px',
-              borderRadius: '12px',
-              border: 'none',
-              backgroundColor: '#111827',
-              color: '#ffffff',
-              fontSize: '16px',
-              fontWeight: 800,
-              cursor: 'pointer',
-              boxShadow: '0 4px 16px rgba(17, 24, 39, 0.12)',
-            }}
-          >
-            Analyser
-          </button>
+          </> )}
+          {showForm && (
+            <button
+              type="submit"
+              style={{
+                position: 'sticky',
+                bottom: 'calc(env(safe-area-inset-bottom, 0px) + 64px)',
+                zIndex: 20,
+                padding: '15px',
+                borderRadius: '12px',
+                border: 'none',
+                backgroundColor: '#111827',
+                color: '#ffffff',
+                fontSize: '16px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                boxShadow: '0 4px 16px rgba(17, 24, 39, 0.12)',
+              }}
+            >
+              Analyser
+            </button>
+          )}
         </form>
 
-        {!result && (
-          <p style={{ margin: '2px 0 0', fontSize: '13px', color: '#6b7280', textAlign: 'center' }}>
-            Le résultat apparaît ici après analyse.
-          </p>
-        )}
 
         {result && (
           <div style={{ ...cardStyle, display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -1826,6 +1947,32 @@ export default function AnalysePage() {
             >
               {saveStatus === 'saving' ? 'Enregistrement...' : "Enregistrer l'analyse"}
             </button>
+            <button
+              type="button"
+              onClick={handleShareAnalysis}
+              disabled={shareStatus === 'sharing'}
+              style={{
+                padding: '12px',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                backgroundColor: '#ffffff',
+                color: '#111827',
+                fontSize: '14px',
+                fontWeight: 800,
+                cursor: shareStatus === 'sharing' ? 'default' : 'pointer',
+                opacity: shareStatus === 'sharing' ? 0.75 : 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+              }}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+              </svg>
+              {shareStatus === 'sharing' ? 'En cours...' : shareStatus === 'copied' ? 'Lien copie !' : savedAnalysisId ? 'Partager' : 'Enregistrer et partager'}
+            </button>
             {saveMessage && (
               <div
                 style={{
@@ -1839,6 +1986,30 @@ export default function AnalysePage() {
               </div>
             )}
           </div>
+        )}
+
+        {result && !showForm && (
+          <button
+            type="button"
+            onClick={() => { setResult(null); setShowForm(true); setSavedAnalysisId(null); setShareToken(null); setShareStatus('idle'); setSaveStatus('idle'); setSaveMessage(''); sessionStorage.removeItem('analyseResult'); }}
+            style={{
+              position: 'sticky',
+              bottom: 'calc(env(safe-area-inset-bottom, 0px) + 64px)',
+              zIndex: 20,
+              width: '100%',
+              padding: '15px',
+              borderRadius: '12px',
+              border: 'none',
+              backgroundColor: '#111827',
+              color: '#ffffff',
+              fontSize: '16px',
+              fontWeight: 800,
+              cursor: 'pointer',
+              boxShadow: '0 4px 16px rgba(17, 24, 39, 0.12)',
+            }}
+          >
+            Nouvelle analyse
+          </button>
         )}
 
       </section>
