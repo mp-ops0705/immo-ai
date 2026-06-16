@@ -55,8 +55,10 @@ const navItems = [
 
 export default function OutilsPage() {
   const [openCapacite, setOpenCapacite] = useState(false);
+  const [typeAchat, setTypeAchat] = useState<'principale' | 'locatif'>('principale');
   const [revenus, setRevenus] = useState('');
   const [charges, setCharges] = useState('');
+  const [loyerFutur, setLoyerFutur] = useState('');
   const [apport, setApport] = useState('');
   const [taux, setTaux] = useState('3.5');
   const [duree, setDuree] = useState(20);
@@ -70,12 +72,13 @@ export default function OutilsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const parse = (v: string) => parseFloat(v.replace(/\s/g, '').replace(',', '.')) || 0;
-  const rev = parse(revenus), chg = parse(charges), app = parse(apport);
+  const rev = parse(revenus), chg = parse(charges), app = parse(apport), loyer = parse(loyerFutur);
+  const revAjuste = rev + loyer * 0.7;
   const t = parse(taux) / 100 / 12, n = duree * 12;
-  const mensualiteMax = rev * 0.35 - chg;
+  const mensualiteMax = revAjuste * 0.35 - chg;
   const capacite = t > 0 && mensualiteMax > 0 ? mensualiteMax * (1 - Math.pow(1 + t, -n)) / t : 0;
   const budget = capacite + app;
-  const tauxEndettement = rev > 0 ? ((mensualiteMax + chg) / rev) * 100 : 0;
+  const endettementActuel = revAjuste > 0 ? (chg / revAjuste) * 100 : 0;
   const hasResult = rev > 0 && mensualiteMax > 0;
   const fmt = (v: number) => Math.round(v).toLocaleString('fr-FR') + ' €';
 
@@ -149,13 +152,21 @@ export default function OutilsPage() {
 
           {openCapacite && (
             <div style={{ backgroundColor: '#f8fafc', borderTop: '1px solid rgba(251,191,36,0.15)', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+
+              {/* Toggle type achat */}
+              <div style={{ display: 'flex', padding: '3px', borderRadius: '10px', backgroundColor: '#ffffff', border: '1px solid #e5e7eb', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.04)' }}>
+                {([['principale', 'Residence principale'], ['locatif', 'Investissement locatif']] as const).map(([val, label]) => (
+                  <button key={val} type="button" onClick={() => { setTypeAchat(val); if (val === 'principale') setLoyerFutur(''); }} style={{ flex: 1, padding: '9px 6px', borderRadius: '8px', border: 'none', backgroundColor: typeAchat === val ? '#0f172a' : 'transparent', color: typeAchat === val ? '#ffffff' : '#6b7280', fontSize: '12px', fontWeight: 800, cursor: 'pointer', transition: 'all 0.15s', lineHeight: 1.3 }}>{label}</button>
+                ))}
+              </div>
+
               <label style={labelStyle}>
                 Revenus nets mensuels du foyer
                 <div style={{ position: 'relative' }}>
                   <input type="number" min="0" value={revenus} onChange={e => setRevenus(e.target.value)} placeholder="3 500" style={inputStyle} />
                   <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', fontSize: '13px', color: '#94a3b8', fontWeight: 700 }}>€</span>
                 </div>
-                <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 500, lineHeight: 1.5 }}>Salaires nets, revenus locatifs, pensions... Additionnez tous les revenus du foyer.</span>
+                <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 500, lineHeight: 1.5 }}>Montant net sur fiche de paie (avant impot sur le revenu). Additionnez tous les revenus du foyer.</span>
               </label>
               <label style={labelStyle}>
                 Charges mensuelles existantes
@@ -163,8 +174,21 @@ export default function OutilsPage() {
                   <input type="number" min="0" value={charges} onChange={e => setCharges(e.target.value)} placeholder="0" style={inputStyle} />
                   <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', fontSize: '13px', color: '#94a3b8', fontWeight: 700 }}>€</span>
                 </div>
-                <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 500, lineHeight: 1.5 }}>Loyer, mensualites de credits en cours, pensions versees. Laissez a 0 si aucune.</span>
+                {typeAchat === 'principale'
+                  ? <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 500, lineHeight: 1.5 }}>Credits en cours (auto, conso...), pensions versees. <strong style={{ color: '#f59e0b' }}>Ne pas inclure votre loyer actuel</strong> — il sera remplace par le credit immobilier.</span>
+                  : <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 500, lineHeight: 1.5 }}>Credits en cours (auto, conso...), pensions versees, et votre loyer actuel si vous continuez a louer votre residence principale.</span>
+                }
               </label>
+              {typeAchat === 'locatif' && (
+                <label style={labelStyle}>
+                  Loyer futur estime
+                  <div style={{ position: 'relative' }}>
+                    <input type="number" min="0" value={loyerFutur} onChange={e => setLoyerFutur(e.target.value)} placeholder="800" style={inputStyle} />
+                    <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', fontSize: '13px', color: '#94a3b8', fontWeight: 700 }}>€</span>
+                  </div>
+                  <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 500, lineHeight: 1.5 }}>Les banques integrent 70 % du loyer prevu dans vos revenus pour le calcul de la capacite.</span>
+                </label>
+              )}
               <label style={labelStyle}>
                 Apport personnel
                 <div style={{ position: 'relative' }}>
@@ -205,13 +229,25 @@ export default function OutilsPage() {
                   </div>
                   {/* Details */}
                   <div style={{ padding: '12px 14px', backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', gap: '0' }}>
-                    {[['Mensualite max', fmt(mensualiteMax) + ' / mois'], ["Taux d'endettement", tauxEndettement.toFixed(1) + ' %']].map(([label, value], i) => (
-                      <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', color: '#64748b', padding: '9px 0', borderBottom: i === 0 ? '1px solid #f1f5f9' : 'none' }}>
+                    {loyer > 0 && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', color: '#64748b', padding: '9px 0', borderBottom: '1px solid #f1f5f9' }}>
+                        <span>Revenus pris en compte</span>
+                        <strong style={{ color: '#0f172a', fontWeight: 800 }}>{fmt(revAjuste)} / mois</strong>
+                      </div>
+                    )}
+                    {[['Mensualite disponible', fmt(mensualiteMax) + ' / mois'], ['Endettement actuel', endettementActuel.toFixed(1) + ' %']].map(([label, value], i, arr) => (
+                      <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', color: '#64748b', padding: '9px 0', borderBottom: i < arr.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
                         <span>{label}</span>
                         <strong style={{ color: '#0f172a', fontWeight: 800 }}>{value}</strong>
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {hasResult && mensualiteMax < 200 && chg > 0 && (
+                <div style={{ padding: '12px 14px', borderRadius: '10px', backgroundColor: '#fff7ed', border: '1px solid #fed7aa', fontSize: '12px', color: '#9a3412', fontWeight: 600, lineHeight: 1.5 }}>
+                  Vos charges actuelles ({endettementActuel.toFixed(0)} % de vos revenus) occupent presque toute la capacite d&apos;emprunt autorisee par les banques (35 %). Si vous achetez votre residence principale, n&apos;incluez pas votre loyer actuel dans les charges — il sera remplace par le credit.
                 </div>
               )}
 
