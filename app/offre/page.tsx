@@ -799,7 +799,7 @@ export default function PurchaseOfferPage() {
           paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 90px)',
         }}
       >
-        <header style={{ padding: '20px 24px', borderRadius: '0 0 24px 24px', background: 'linear-gradient(145deg, #0f172a 0%, #1e293b 100%)', color: '#ffffff', boxShadow: '0 4px 24px rgba(15,23,42,0.18)', position: 'relative', overflow: 'hidden', marginLeft: '-12px', marginRight: '-12px', marginTop: '-12px' }}>
+        <header style={{ padding: '20px 24px', borderRadius: '0', background: 'linear-gradient(145deg, #0f172a 0%, #1e293b 100%)', color: '#ffffff', boxShadow: 'none', position: 'relative', overflow: 'hidden', marginLeft: '-12px', marginRight: '-12px', marginTop: '-12px' }}>
           <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '160px', height: '160px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(251,191,36,0.15) 0%, transparent 65%)', pointerEvents: 'none' }} />
           <div style={{ position: 'absolute', bottom: '-20px', left: '20px', width: '90px', height: '90px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(251,191,36,0.07) 0%, transparent 65%)', pointerEvents: 'none' }} />
           <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Offre d'achat</div>
