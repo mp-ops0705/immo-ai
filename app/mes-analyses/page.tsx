@@ -239,39 +239,35 @@ export default function MesAnalysesPage() {
         {error && <div style={{ ...cardStyle, color: '#dc2626', fontSize: '14px', fontWeight: 700 }}>{error}</div>}
 
         {!isLoading && analyses.length === 0 && (
-          <div
-            style={{
-              ...cardStyle,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '12px',
-              padding: '32px 24px',
-              textAlign: 'center',
-            }}
-          >
-            <div style={{ fontSize: '36px' }}>🏠</div>
-            <div style={{ fontSize: '16px', fontWeight: 800, color: '#111827' }}>
-              Aucune analyse enregistrée
+          <div style={{ borderRadius: '20px', overflow: 'hidden', boxShadow: '0 4px 24px rgba(15,23,42,0.10)' }}>
+            {/* Dark hero top */}
+            <div style={{ padding: '32px 24px 28px', background: 'linear-gradient(145deg, #0f172a 0%, #1e293b 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '140px', height: '140px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(251,191,36,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
+              {/* Icon */}
+              <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(251,191,36,0.8)" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '17px', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.01em', marginBottom: '6px' }}>Aucune analyse enregistrée</div>
+                <div style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.55, maxWidth: '260px' }}>Lance ta première analyse et sauvegarde-la pour suivre tes opportunités ici.</div>
+              </div>
             </div>
-            <div style={{ fontSize: '14px', color: '#64748b', lineHeight: 1.5 }}>
-              Analyse ta première propriété et sauvegarde le résultat pour le retrouver ici.
+            {/* CTA bottom */}
+            <div style={{ padding: '16px', backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <Link href="/analyse" style={{ display: 'block', textAlign: 'center', padding: '13px', borderRadius: '10px', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', color: '#ffffff', fontSize: '14px', fontWeight: 800, textDecoration: 'none', letterSpacing: '-0.01em' }}>
+                Analyser un bien
+              </Link>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'center' }}>
+                {['Score /10', 'Cashflow', 'Rendement', 'Fiscalité'].map((label, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <div style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: '#fbbf24' }} />
+                    <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 700 }}>{label}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-            <Link
-              href="/analyse"
-              style={{
-                marginTop: '4px',
-                padding: '12px 20px',
-                borderRadius: '8px',
-                backgroundColor: '#111827',
-                color: '#ffffff',
-                fontSize: '14px',
-                fontWeight: 800,
-                textDecoration: 'none',
-              }}
-            >
-              Analyser une propriété
-            </Link>
           </div>
         )}
 

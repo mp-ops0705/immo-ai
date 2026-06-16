@@ -1,6 +1,6 @@
 'use client';
 
-import { ChangeEvent, FormEvent, useRef, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
 
 type CoproAnalysis = {
   summary: string;
@@ -53,6 +53,25 @@ const navItems = [
   { href: '/compte', label: 'Compte', icon: <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></> },
 ];
 
+function useCountUp(target: number, duration = 700): number {
+  const [value, setValue] = useState(0);
+  const rafRef = useRef<number>(0);
+  useEffect(() => {
+    const start = performance.now();
+    cancelAnimationFrame(rafRef.current);
+    if (target === 0) { setValue(0); return; }
+    const animate = (now: number) => {
+      const p = Math.min((now - start) / duration, 1);
+      setValue(target * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) rafRef.current = requestAnimationFrame(animate);
+      else setValue(target);
+    };
+    rafRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [target, duration]);
+  return value;
+}
+
 export default function OutilsPage() {
   const [openCapacite, setOpenCapacite] = useState(false);
   const [typeAchat, setTypeAchat] = useState<'principale' | 'locatif'>('principale');
@@ -71,16 +90,28 @@ export default function OutilsPage() {
   const [showGuide, setShowGuide] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  type CalcResult = { capacite: number; budget: number; mensualiteMax: number; endettementActuel: number; revAjuste: number; loyer: number };
+  const [calcResult, setCalcResult] = useState<CalcResult | null>(null);
+
   const parse = (v: string) => parseFloat(v.replace(/\s/g, '').replace(',', '.')) || 0;
-  const rev = parse(revenus), chg = parse(charges), app = parse(apport), loyer = parse(loyerFutur);
-  const revAjuste = rev + loyer * 0.7;
-  const t = parse(taux) / 100 / 12, n = duree * 12;
-  const mensualiteMax = revAjuste * 0.35 - chg;
-  const capacite = t > 0 && mensualiteMax > 0 ? mensualiteMax * (1 - Math.pow(1 + t, -n)) / t : 0;
-  const budget = capacite + app;
-  const endettementActuel = revAjuste > 0 ? (chg / revAjuste) * 100 : 0;
-  const hasResult = rev > 0 && mensualiteMax > 0;
+
+  const handleCalculer = () => {
+    const rev = parse(revenus), chg = parse(charges), app = parse(apport), loyer = parse(loyerFutur);
+    const revAjuste = rev + loyer * 0.7;
+    const t = parse(taux) / 100 / 12, n = duree * 12;
+    const mensualiteMax = revAjuste * 0.35 - chg;
+    const capacite = t > 0 && mensualiteMax > 0 ? mensualiteMax * (1 - Math.pow(1 + t, -n)) / t : 0;
+    const budget = capacite + app;
+    const endettementActuel = revAjuste > 0 ? (chg / revAjuste) * 100 : 0;
+    if (rev > 0 && mensualiteMax > 0) setCalcResult({ capacite, budget, mensualiteMax, endettementActuel, revAjuste, loyer });
+  };
+
+  const cr = calcResult;
+  const debtColor = cr ? (cr.endettementActuel >= 30 ? '#ef4444' : cr.endettementActuel >= 22 ? '#f59e0b' : '#22c55e') : '#22c55e';
   const fmt = (v: number) => Math.round(v).toLocaleString('fr-FR') + ' €';
+  const animatedCapacite = useCountUp(cr?.capacite ?? 0, 800);
+  const animatedBudget = useCountUp(cr?.budget ?? 0, 900);
+  const animatedMensualite = useCountUp(cr?.mensualiteMax ?? 0, 650);
 
   const handleFilesChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFiles(Array.from(e.target.files ?? []).filter(isAccepted));
@@ -111,6 +142,7 @@ export default function OutilsPage() {
 
   return (
     <main style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #e8edf5 0%, #f8fafc 260px, #f8fafc 100%)', padding: '12px' }}>
+      <style>{`@keyframes cfSlideUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }`}</style>
       <section style={{ width: '100%', maxWidth: '430px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 90px)' }}>
 
         {/* PAGE HEADER */}
@@ -214,50 +246,60 @@ export default function OutilsPage() {
                 </label>
               </div>
 
-              {hasResult && (
-                <div style={{ marginTop: '4px', borderRadius: '14px', overflow: 'hidden', border: '1px solid rgba(251,191,36,0.2)' }}>
-                  {/* Hero result */}
-                  <div style={{ padding: '16px', background: 'linear-gradient(135deg, #0f172a 0%, #1c2d4a 100%)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', backgroundColor: 'rgba(251,191,36,0.15)' }}>
-                    <div style={{ padding: '14px', backgroundColor: '#0f172a' }}>
-                      <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>Capacite d'emprunt</div>
-                      <div style={{ fontSize: '20px', fontWeight: 900, color: '#fbbf24', letterSpacing: '-0.02em' }}>{fmt(capacite)}</div>
-                    </div>
-                    <div style={{ padding: '14px', backgroundColor: '#111827' }}>
-                      <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>Budget total</div>
-                      <div style={{ fontSize: '20px', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em' }}>{fmt(budget)}</div>
+              {/* Bouton Calculer */}
+              <button type="button" onClick={handleCalculer} style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', color: '#ffffff', fontSize: '15px', fontWeight: 800, cursor: 'pointer', letterSpacing: '-0.01em', boxShadow: '0 4px 16px rgba(15,23,42,0.2)' }}>
+                Calculer ma capacite
+              </button>
+
+              {cr && (
+                <div key={cr.capacite + '-' + cr.mensualiteMax} style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(251,191,36,0.18)', boxShadow: '0 4px 20px rgba(15,23,42,0.12)', animation: 'cfSlideUp 0.4s cubic-bezier(0.22,1,0.36,1) both' }}>
+                  {/* Hero result — vertical layout */}
+                  <div style={{ padding: '20px', background: 'linear-gradient(145deg, #0f172a 0%, #1e293b 100%)', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: '-24px', right: '-24px', width: '100px', height: '100px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(251,191,36,0.18) 0%, transparent 70%)', pointerEvents: 'none' }} />
+                    <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Capacite d&apos;emprunt</div>
+                    <div style={{ fontSize: '32px', fontWeight: 900, color: '#fbbf24', letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>{Math.round(animatedCapacite).toLocaleString('fr-FR')} €</div>
+                    <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>Budget total avec apport</div>
+                      <div style={{ fontSize: '18px', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>{Math.round(animatedBudget).toLocaleString('fr-FR')} €</div>
                     </div>
                   </div>
                   {/* Details */}
-                  <div style={{ padding: '12px 14px', backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', gap: '0' }}>
-                    {loyer > 0 && (
+                  <div style={{ padding: '12px 16px', backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column' }}>
+                    {cr.loyer > 0 && (
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', color: '#64748b', padding: '9px 0', borderBottom: '1px solid #f1f5f9' }}>
                         <span>Revenus pris en compte</span>
-                        <strong style={{ color: '#0f172a', fontWeight: 800 }}>{fmt(revAjuste)} / mois</strong>
+                        <strong style={{ color: '#0f172a', fontWeight: 800 }}>{fmt(cr.revAjuste)} / mois</strong>
                       </div>
                     )}
-                    {[['Mensualite disponible', fmt(mensualiteMax) + ' / mois'], ['Endettement actuel', endettementActuel.toFixed(1) + ' %']].map(([label, value], i, arr) => (
-                      <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', color: '#64748b', padding: '9px 0', borderBottom: i < arr.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
-                        <span>{label}</span>
-                        <strong style={{ color: '#0f172a', fontWeight: 800 }}>{value}</strong>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', color: '#64748b', padding: '9px 0', borderBottom: '1px solid #f1f5f9' }}>
+                      <span>Mensualite disponible</span>
+                      <strong style={{ color: '#0f172a', fontWeight: 800, fontVariantNumeric: 'tabular-nums' }}>{Math.round(animatedMensualite).toLocaleString('fr-FR')} € / mois</strong>
+                    </div>
+                    {/* Debt ratio bar */}
+                    <div style={{ padding: '10px 0' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '7px' }}>
+                        <span style={{ fontSize: '13px', color: '#64748b' }}>Endettement actuel</span>
+                        <strong style={{ fontSize: '13px', color: debtColor, fontWeight: 800 }}>{cr.endettementActuel.toFixed(1)} %</strong>
                       </div>
-                    ))}
+                      <div style={{ position: 'relative', height: '6px', borderRadius: '999px', backgroundColor: '#f1f5f9' }}>
+                        <div style={{ height: '100%', borderRadius: '999px', width: `${Math.min(cr.endettementActuel / 35, 1) * 100}%`, backgroundColor: debtColor, transition: 'width 0.7s cubic-bezier(0.22,1,0.36,1)' }} />
+                        <div style={{ position: 'absolute', right: 0, top: '-3px', width: '2px', height: '12px', backgroundColor: '#cbd5e1', borderRadius: '1px' }} />
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
+                        <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 600 }}>limite banque 35 %</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
 
-              {hasResult && mensualiteMax < 200 && chg > 0 && (
+              {cr && cr.mensualiteMax < 200 && (
                 <div style={{ padding: '12px 14px', borderRadius: '10px', backgroundColor: '#fff7ed', border: '1px solid #fed7aa', fontSize: '12px', color: '#9a3412', fontWeight: 600, lineHeight: 1.5 }}>
-                  Vos charges actuelles ({endettementActuel.toFixed(0)} % de vos revenus) occupent presque toute la capacite d&apos;emprunt autorisee par les banques (35 %). Si vous achetez votre residence principale, n&apos;incluez pas votre loyer actuel dans les charges — il sera remplace par le credit.
+                  Vos charges actuelles ({cr.endettementActuel.toFixed(0)} % de vos revenus) occupent presque toute la capacite autorisee par les banques (35 %). Si vous achetez votre residence principale, n&apos;incluez pas votre loyer actuel dans les charges — il sera remplace par le credit.
                 </div>
               )}
 
-              {!hasResult && revenus === '' && (
-                <div style={{ padding: '12px 14px', borderRadius: '10px', backgroundColor: '#fffbeb', border: '1px solid #fde68a', fontSize: '12px', color: '#92400e', fontWeight: 600, lineHeight: 1.5 }}>
-                  Renseignez vos revenus pour obtenir votre estimation.
-                </div>
-              )}
-
-              <p style={{ margin: 0, fontSize: '10px', color: '#94a3b8', lineHeight: 1.5 }}>Estimation indicative a 35 % d'endettement max. La banque appliquera ses propres criteres.</p>
+              <p style={{ margin: 0, fontSize: '10px', color: '#94a3b8', lineHeight: 1.5 }}>Estimation indicative a 35 % d&apos;endettement max. La banque appliquera ses propres criteres.</p>
             </div>
           )}
         </div>

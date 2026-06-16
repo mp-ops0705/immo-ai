@@ -401,6 +401,26 @@ const generateMockAI = (purchaseValue: number, rentValue?: number, grossYield?: 
   };
 };
 
+function useCountUp(target: number, duration = 800): number {
+  const [value, setValue] = useState(0);
+  const rafRef = useRef<number>(0);
+  useEffect(() => {
+    const start = performance.now();
+    cancelAnimationFrame(rafRef.current);
+    if (target === 0) { setValue(0); return; }
+    const animate = (now: number) => {
+      const p = Math.min((now - start) / duration, 1);
+      const v = target * (1 - Math.pow(1 - p, 3));
+      setValue(v);
+      if (p < 1) rafRef.current = requestAnimationFrame(animate);
+      else setValue(target);
+    };
+    rafRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [target, duration]);
+  return value;
+}
+
 export default function AnalysePage() {
   const router = useRouter();
   const [isAuthChecking, setIsAuthChecking] = useState(true);
@@ -426,6 +446,10 @@ export default function AnalysePage() {
   const scoreCardRef = useRef<HTMLDivElement>(null);
   const [aiResult, setAiResult] = useState<AiEstimate | null>(null);
   const [result, setResult] = useState<Result | null>(null);
+  const scoreColor = result ? (result.score >= 7.5 ? '#86efac' : result.score >= 5 ? '#fcd34d' : '#fca5a5') : '#86efac';
+  const animatedScore = useCountUp(result?.score ?? 0, 900);
+  const animatedCashflow = useCountUp(result ? Math.abs(result.realCashflow) : 0, 700);
+  const animatedYield = useCountUp(result?.netYield ?? 0, 800);
   const [scrapingError, setScrapingError] = useState(false);
   const [insufficientDataError, setInsufficientDataError] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
@@ -433,6 +457,7 @@ export default function AnalysePage() {
   const [shareToken, setShareToken] = useState<string | null>(null);
   const [shareStatus, setShareStatus] = useState<'idle' | 'sharing' | 'copied'>('idle');
   const [showAllDetails, setShowAllDetails] = useState(false);
+  const [isAnalysing, setIsAnalysing] = useState(false);
   const [tmi, setTmi] = useState(30);
   const [showForm, setShowForm] = useState(true);
 
@@ -605,6 +630,9 @@ export default function AnalysePage() {
     setAnalysisMode('auto');
     setSaveStatus('idle');
     setSaveMessage('');
+    setIsAnalysing(true);
+    setResult(null);
+    setShowForm(false);
 
     const resetAutoResult = () => {
       setResult(null);
@@ -614,12 +642,16 @@ export default function AnalysePage() {
     const triggerScrapingError = () => {
       setScrapingError(true);
       setInsufficientDataError(false);
+      setIsAnalysing(false);
+      setShowForm(true);
       resetAutoResult();
     };
 
     const triggerInsufficientDataError = () => {
       setScrapingError(false);
       setInsufficientDataError(true);
+      setIsAnalysing(false);
+      setShowForm(true);
       resetAutoResult();
     };
 
@@ -870,6 +902,7 @@ export default function AnalysePage() {
       marketRentLow: apiAnalysis?.marketRentLow ?? null,
       marketRentHigh: apiAnalysis?.marketRentHigh ?? null,
     });
+    setIsAnalysing(false);
     setShowForm(false);
   };
 
@@ -878,6 +911,8 @@ export default function AnalysePage() {
     setAnalysisMode('manual');
     setSaveStatus('idle');
     setSaveMessage('');
+    setIsAnalysing(true);
+    setShowForm(false);
 
     const purchaseValue = parseFloat(purchasePrice);
     const rentValue = parseFloat(monthlyRent);
@@ -997,6 +1032,7 @@ export default function AnalysePage() {
       marketRentLow: marketRent.marketRentLow,
       marketRentHigh: marketRent.marketRentHigh,
     });
+    setIsAnalysing(false);
     setShowForm(false);
 
     if (typeof window !== 'undefined') {
@@ -1192,7 +1228,23 @@ export default function AnalysePage() {
           paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 90px)',
         }}
       >
-        <header style={{ padding: '20px', borderRadius: '20px', background: 'linear-gradient(145deg, #0f172a 0%, #1e293b 100%)', color: '#ffffff', boxShadow: '0 4px 24px rgba(15,23,42,0.18)', position: 'relative', overflow: 'hidden' }}>
+        <style>{`
+          @keyframes cfSlideUp {
+            from { opacity: 0; transform: translateY(22px); }
+            to   { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes cfFadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+          }
+          @keyframes shimmer {
+            0%   { background-position: -400px 0; }
+            100% { background-position: 400px 0; }
+          }
+          .sk-dark  { background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.06) 75%); background-size: 800px 100%; animation: shimmer 1.6s infinite linear; border-radius: 6px; }
+          .sk-light { background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%); background-size: 800px 100%; animation: shimmer 1.6s infinite linear; border-radius: 6px; }
+        `}</style>
+<header style={{ padding: '20px', borderRadius: '20px', background: 'linear-gradient(145deg, #0f172a 0%, #1e293b 100%)', color: '#ffffff', boxShadow: '0 4px 24px rgba(15,23,42,0.18)', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '160px', height: '160px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(251,191,36,0.15) 0%, transparent 65%)', pointerEvents: 'none' }} />
           <div style={{ position: 'absolute', bottom: '-20px', left: '20px', width: '90px', height: '90px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(251,191,36,0.07) 0%, transparent 65%)', pointerEvents: 'none' }} />
           <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Analyse</div>
@@ -1200,94 +1252,130 @@ export default function AnalysePage() {
           <p style={{ margin: '5px 0 0', fontSize: '13px', color: '#64748b', lineHeight: 1.5 }}>Calculez le rendement, le cashflow et la rentabilité avant d'acheter.</p>
         </header>
 
+        {isAnalysing && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', animation: 'cfFadeIn 0.3s ease both' }}>
+            {/* Skeleton score card */}
+            <div style={{ padding: '20px', borderRadius: '20px', background: 'linear-gradient(145deg, #0f172a 0%, #1e293b 100%)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div className="sk-dark" style={{ height: '10px', width: '80px' }} />
+                <div className="sk-dark" style={{ height: '22px', width: '90px', borderRadius: '999px' }} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div className="sk-dark" style={{ height: '44px', width: '140px' }} />
+                <div className="sk-dark" style={{ height: '4px', width: '100%' }} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div className="sk-dark" style={{ height: '11px', width: '95%' }} />
+                <div className="sk-dark" style={{ height: '11px', width: '70%' }} />
+              </div>
+              <div style={{ padding: '16px', borderRadius: '14px', background: 'rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div className="sk-dark" style={{ height: '10px', width: '120px' }} />
+                <div className="sk-dark" style={{ height: '36px', width: '160px' }} />
+                <div className="sk-dark" style={{ height: '10px', width: '80%' }} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                {[0, 1].map(i => (
+                  <div key={i} style={{ padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div className="sk-dark" style={{ height: '10px', width: '70%' }} />
+                    <div className="sk-dark" style={{ height: '22px', width: '60%' }} />
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Skeleton fiscalité */}
+            <div style={{ padding: '16px', borderRadius: '12px', background: '#ffffff', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div className="sk-light" style={{ height: '13px', width: '140px' }} />
+              <div className="sk-light" style={{ height: '36px', width: '100%' }} />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                {[0, 1].map(i => (
+                  <div key={i} style={{ padding: '12px', borderRadius: '8px', background: '#f8fafc', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div className="sk-light" style={{ height: '12px', width: '80%' }} />
+                    <div className="sk-light" style={{ height: '20px', width: '60%' }} />
+                    <div className="sk-light" style={{ height: '10px', width: '70%' }} />
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Skeleton détails */}
+            <div style={{ padding: '16px', borderRadius: '12px', background: '#ffffff', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div className="sk-light" style={{ height: '11px', width: '60px' }} />
+              {[100, 85, 70, 90, 75].map((w, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '10px', borderBottom: i < 4 ? '1px solid #f1f5f9' : 'none' }}>
+                  <div className="sk-light" style={{ height: '13px', width: `${w * 0.5}%` }} />
+                  <div className="sk-light" style={{ height: '13px', width: '20%' }} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {result && (
           <div
             ref={scoreCardRef}
             style={{
               position: 'relative',
               overflow: 'hidden',
-              padding: '18px',
-              borderRadius: '20px',
-              background:
-                'radial-gradient(circle at top right, rgba(148, 163, 184, 0.32), transparent 34%), linear-gradient(145deg, #0f172a 0%, #111827 48%, #1e293b 100%)',
-              border: '1px solid rgba(255, 255, 255, 0.10)',
-              boxShadow: '0 1px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)',
+              padding: '16px',
+              borderRadius: '16px',
+              background: 'linear-gradient(145deg, #0f172a 0%, #111827 48%, #1e293b 100%)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              boxShadow: '0 4px 20px rgba(15,23,42,0.2)',
               display: 'flex',
               flexDirection: 'column',
-              gap: '14px',
+              gap: '12px',
               color: '#ffffff',
+              animation: 'cfSlideUp 0.45s cubic-bezier(0.22,1,0.36,1) both',
             }}
           >
-            <div
-              style={{
-                position: 'absolute',
-                right: '-34px',
-                top: '-48px',
-                width: '145px',
-                height: '145px',
-                borderRadius: '999px',
-                background: 'rgba(255, 255, 255, 0.08)',
-              }}
-            />
-            {(() => {
-              const pct = Math.min(Math.max(result.score / 10, 0), 1);
-              const r = 28;
-              const circ = 2 * Math.PI * r;
-              const dash = pct * circ;
-              const scoreColor = result.score >= 7.5 ? '#86efac' : result.score >= 5 ? '#fcd34d' : '#fca5a5';
-              return (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontSize: '10px', color: '#cbd5e1', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '10px' }}>
-                      Score global
-                    </div>
-                    <svg width="72" height="72" viewBox="0 0 72 72">
-                      <circle cx="36" cy="36" r={r} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="6" />
-                      <circle
-                        cx="36" cy="36" r={r} fill="none"
-                        stroke={scoreColor} strokeWidth="6"
-                        strokeDasharray={`${dash} ${circ - dash}`}
-                        strokeLinecap="round"
-                        transform="rotate(-90 36 36)"
-                      />
-                      <text x="36" y="40" textAnchor="middle" fill="#ffffff" fontSize="18" fontWeight="800" fontFamily="inherit">
-                        {result.score}
-                      </text>
-                    </svg>
-                  </div>
-                  <div
-                    style={{
-                      padding: '8px 16px',
-                      borderRadius: '999px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                      border: `1px solid ${scoreColor}40`,
-                      color: scoreColor,
-                      fontSize: '15px',
-                      fontWeight: 800,
-                      letterSpacing: '-0.01em',
-                    }}
-                  >
-                    {result.status}
-                  </div>
-                </div>
-              );
-            })()}
-            <div style={{ fontSize: '14px', color: '#dbeafe', lineHeight: 1.45, fontWeight: 650 }}>
+            {/* Decorative glow blob */}
+            <div style={{ position: 'absolute', right: '-30px', top: '-30px', width: '120px', height: '120px', borderRadius: '50%', background: `radial-gradient(circle, ${scoreColor}22 0%, transparent 70%)`, pointerEvents: 'none' }} />
+
+            {/* Header row */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative' }}>
+              <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.35)', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Score global</div>
+              <div style={{ padding: '4px 12px', borderRadius: '999px', backgroundColor: scoreColor + '22', border: `1px solid ${scoreColor}50`, color: scoreColor, fontSize: '11px', fontWeight: 800 }}>
+                {result.status}
+              </div>
+            </div>
+
+            {/* Hero score number */}
+            <div style={{ position: 'relative' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', lineHeight: 1 }}>
+                <span style={{ fontSize: '30px', fontWeight: 900, letterSpacing: '-0.03em', color: scoreColor, fontVariantNumeric: 'tabular-nums' }}>
+                  {animatedScore.toFixed(1)}
+                </span>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.22)', paddingBottom: '1px' }}>/10</span>
+              </div>
+              <div style={{ marginTop: '6px', height: '2px', borderRadius: '999px', backgroundColor: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+                <div style={{ height: '100%', borderRadius: '999px', width: `${(animatedScore / 10) * 100}%`, background: `linear-gradient(90deg, ${scoreColor}70, ${scoreColor})` }} />
+              </div>
+            </div>
+
+            {/* Insight */}
+            <div style={{ fontSize: '12px', color: '#94a3b8', lineHeight: 1.5, fontWeight: 500 }}>
               {result.insight}
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              <div style={{ padding: '12px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.09)', border: '1px solid rgba(255, 255, 255, 0.10)' }}>
-                <div style={{ fontSize: '12px', color: '#cbd5e1', fontWeight: 700 }}>Cashflow mensuel</div>
-                <div style={{ marginTop: '5px', fontSize: '20px', fontWeight: 900, color: result.realCashflow >= 0 ? '#86efac' : '#fca5a5' }}>
-                  {formatCurrency(result.realCashflow)}
-                </div>
-                <div style={{ marginTop: '4px', fontSize: '10px', color: 'rgba(203,213,225,0.55)', fontWeight: 500, lineHeight: 1.45 }}>Ce qui rentre ou sort de votre poche chaque mois, une fois le crédit et les charges payés.</div>
+
+            {/* Cashflow hero block */}
+            <div style={{ padding: '12px', borderRadius: '12px', background: result.realCashflow >= 0 ? 'rgba(134,239,172,0.07)' : 'rgba(252,165,165,0.07)', border: `1px solid ${result.realCashflow >= 0 ? 'rgba(134,239,172,0.18)' : 'rgba(252,165,165,0.18)'}` }}>
+              <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.35)', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '6px' }}>Cashflow mensuel net</div>
+              <div style={{ fontSize: '22px', fontWeight: 900, letterSpacing: '-0.02em', lineHeight: 1, color: result.realCashflow >= 0 ? '#86efac' : '#fca5a5', fontVariantNumeric: 'tabular-nums' }}>
+                {result.realCashflow >= 0 ? '+' : '−'}{Math.round(animatedCashflow).toLocaleString('fr-FR')}&nbsp;€
               </div>
-              <div style={{ padding: '12px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.09)', border: '1px solid rgba(255, 255, 255, 0.10)' }}>
-                <div style={{ fontSize: '12px', color: '#cbd5e1', fontWeight: 700 }}>Rendement net</div>
-                <div style={{ marginTop: '5px', fontSize: '20px', fontWeight: 900, color: '#ffffff' }}>
-                  {result.netYield.toFixed(2)}%
-                </div>
+              <div style={{ marginTop: '4px', fontSize: '10px', color: 'rgba(203,213,225,0.4)', fontWeight: 500 }}>
+                Après crédit, charges et frais — ce qui rentre ou sort chaque mois.
+              </div>
+            </div>
+
+            {/* Secondary metrics */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <div style={{ padding: '10px', borderRadius: '10px', backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.35)', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '4px' }}>Rendement net</div>
+                <div style={{ fontSize: '15px', fontWeight: 900, letterSpacing: '-0.02em', color: '#ffffff', fontVariantNumeric: 'tabular-nums' }}>{animatedYield.toFixed(2)}%</div>
+              </div>
+              <div style={{ padding: '10px', borderRadius: '10px', backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.35)', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '4px' }}>Rendement brut</div>
+                <div style={{ fontSize: '15px', fontWeight: 900, letterSpacing: '-0.02em', color: '#64748b', fontVariantNumeric: 'tabular-nums' }}>{result.grossYield.toFixed(2)}%</div>
               </div>
             </div>
           </div>
@@ -1304,7 +1392,7 @@ export default function AnalysePage() {
           const bicIsBetter = bicNet > foncierNet;
           const fmt = (v: number) => (v < 0 ? '- ' : '') + Math.abs(Math.round(v)).toLocaleString('fr-FR') + ' €';
           return (
-            <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: '#ffffff', border: '1px solid rgba(226, 232, 240, 0.9)', boxShadow: '0 1px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: '#ffffff', border: '1px solid rgba(226, 232, 240, 0.9)', boxShadow: '0 1px 4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)', display: 'flex', flexDirection: 'column', gap: '12px', animation: 'cfSlideUp 0.45s cubic-bezier(0.22,1,0.36,1) 0.1s both' }}>
               <div>
                 <div style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a', marginBottom: '2px' }}>Fiscalité de vos loyers</div>
                 <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 500 }}>Estimez l'impôt selon votre situation — sélectionnez votre tranche d'imposition.</div>
@@ -1731,7 +1819,7 @@ export default function AnalysePage() {
 
 
         {result && (
-          <div style={{ ...cardStyle, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ ...cardStyle, display: 'flex', flexDirection: 'column', gap: '12px', animation: 'cfSlideUp 0.45s cubic-bezier(0.22,1,0.36,1) 0.2s both' }}>
             <div style={{ ...sectionTitleStyle, color: '#334155' }}>Détails</div>
             {(() => {
               const tooltips: Record<string, string> = {
