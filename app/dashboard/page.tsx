@@ -456,7 +456,7 @@ export default function DashboardPage() {
       <section style={{ width: '100%', maxWidth: '430px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '16px', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 90px)' }}>
 
         {/* ── Header ── */}
-        <header style={{ padding: '24px 24px 20px', background: 'linear-gradient(145deg, #0f172a 0%, #1e293b 100%)', color: '#ffffff', position: 'relative', overflow: 'hidden', marginLeft: '-12px', marginRight: '-12px', marginTop: '-12px' }}>
+        <header style={{ padding: '24px 24px 20px', background: 'linear-gradient(145deg, #0f172a 0%, #1e293b 100%)', color: '#ffffff', position: 'relative', overflow: 'hidden', width: '100vw', marginLeft: 'calc(-50vw + 50%)', marginRight: 'calc(-50vw + 50%)', marginTop: '-12px' }}>
           <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '180px', height: '180px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(251,191,36,0.12) 0%, transparent 65%)', pointerEvents: 'none' }} />
           <div style={{ position: 'absolute', bottom: '-20px', left: '10px', width: '100px', height: '100px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.1) 0%, transparent 65%)', pointerEvents: 'none' }} />
           <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '6px' }}>Tableau de bord</div>
@@ -577,28 +577,35 @@ export default function DashboardPage() {
         )}
 
         {/* ── Actions rapides ── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.01em' }}>Actions rapides</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-            {[
-              { href: '/analyse', label: 'Analyser un bien', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', color: '#6366f1' },
-              { href: '/dashboard/ajouter', label: 'Ajouter un bien', icon: 'M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2zM9 22V12h6v10', color: '#34d399' },
-              { href: '/mes-analyses', label: 'Mes analyses', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', color: '#fbbf24' },
-              { href: '/outils?open=offre', label: 'Capacité d\'emprunt', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', color: '#f97316' },
-            ].map(action => (
-              <Link
-                key={action.href}
-                href={action.href}
-                style={{ padding: '16px 14px', borderRadius: '14px', backgroundColor: '#ffffff', border: '1px solid rgba(226,232,240,0.9)', boxShadow: '0 1px 4px rgba(15,23,42,0.06)', display: 'flex', flexDirection: 'column', gap: '10px', textDecoration: 'none' }}
-              >
-                <div style={{ width: '36px', height: '36px', borderRadius: '10px', backgroundColor: `${action.color}18`, border: `1px solid ${action.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={action.color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-                    <path d={action.icon} />
-                  </svg>
+          <div style={{ overflow: 'hidden', margin: '0 -12px' }}>
+            {(() => {
+              const actions = [
+                { href: '/analyse', label: 'Analyser un bien', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', color: '#6366f1' },
+                { href: '/dashboard/ajouter', label: 'Ajouter un bien', icon: 'M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2zM9 22V12h6v10', color: '#3b82f6' },
+                { href: '/mes-analyses', label: 'Mes analyses', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', color: '#8b5cf6' },
+                { href: '/outils?open=offre', label: "Capacité d'emprunt", icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', color: '#06b6d4' },
+              ];
+              return (
+                <div style={{ display: 'flex', gap: '10px', paddingLeft: '12px', width: 'max-content', animation: 'actionsScroll 14s linear infinite' }}>
+                  {[...actions, ...actions].map((action, i) => (
+                    <Link
+                      key={i}
+                      href={action.href}
+                      style={{ flexShrink: 0, width: '130px', padding: '16px 14px', borderRadius: '16px', backgroundColor: '#ffffff', border: '1px solid rgba(226,232,240,0.9)', borderTop: `3px solid ${action.color}`, display: 'flex', flexDirection: 'column', gap: '12px', textDecoration: 'none', boxShadow: '0 2px 8px rgba(15,23,42,0.07)' }}
+                    >
+                      <div style={{ width: '34px', height: '34px', borderRadius: '10px', backgroundColor: `${action.color}16`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={action.color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                          <path d={action.icon} />
+                        </svg>
+                      </div>
+                      <span style={{ fontSize: '12px', fontWeight: 800, color: '#0f172a', lineHeight: 1.3 }}>{action.label}</span>
+                    </Link>
+                  ))}
                 </div>
-                <span style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a', lineHeight: 1.3 }}>{action.label}</span>
-              </Link>
-            ))}
+              );
+            })()}
           </div>
         </div>
 
@@ -618,6 +625,8 @@ export default function DashboardPage() {
       {selectedProperty && (
         <PropertyModal property={selectedProperty} onClose={() => setSelectedProperty(null)} />
       )}
+
+      <style>{`@keyframes actionsScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }`}</style>
     </main>
   );
 }
