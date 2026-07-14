@@ -10,7 +10,7 @@ export default function Home() {
   useEffect(() => {
     const redirectUser = async () => {
       const { data } = await supabase.auth.getSession();
-      router.replace(data.session ? '/analyse' : '/login');
+      router.replace(data.session ? '/dashboard' : '/login');
     };
 
     redirectUser();
