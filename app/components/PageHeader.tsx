@@ -15,10 +15,11 @@ export function PageHeader({ eyebrow, title, subtitle, right, children }: PageHe
       width: '100%',
       boxSizing: 'border-box',
       background: 'linear-gradient(160deg, #0f172a 0%, #1e293b 100%)',
-      paddingTop: 'calc(env(safe-area-inset-top, 0px) + 20px)',
-      paddingBottom: '28px',
+      paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)',
+      paddingBottom: '18px',
       paddingLeft: '20px',
       paddingRight: '20px',
+      height: 'calc(env(safe-area-inset-top, 0px) + 132px)',
       position: 'relative',
       overflow: 'hidden',
       color: '#ffffff',
@@ -29,11 +30,11 @@ export function PageHeader({ eyebrow, title, subtitle, right, children }: PageHe
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             {eyebrow && (
-              <div style={{ fontSize: '11px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>
+              <div style={{ fontSize: '11px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '6px' }}>
                 {eyebrow}
               </div>
             )}
-            <h1 style={{ margin: '0 0 6px', fontSize: '24px', fontWeight: 900, letterSpacing: '-0.02em', lineHeight: 1.2, color: '#ffffff' }}>
+            <h1 style={{ margin: '0 0 4px', fontSize: '24px', fontWeight: 900, letterSpacing: '-0.02em', lineHeight: 1.2, color: '#ffffff' }}>
               {title}
             </h1>
             {subtitle && (

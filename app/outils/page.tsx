@@ -558,7 +558,7 @@ export default function OutilsPage() {
       <PageHeader
         eyebrow="Outils"
         title="Outils & calculateurs"
-        subtitle="Capacité d'emprunt, copropriété, offre d'achat — tout au même endroit."
+        subtitle="Capacité d'emprunt, copropriété et offre d'achat."
       />
       <section style={{ maxWidth: '430px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingTop: '20px', paddingLeft: '16px', paddingRight: '16px', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 90px)', overflowWrap: 'break-word' }}>
 
