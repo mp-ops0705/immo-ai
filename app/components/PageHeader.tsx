@@ -11,6 +11,9 @@ type PageHeaderProps = {
 export function PageHeader({ eyebrow, title, subtitle, right, children }: PageHeaderProps) {
   return (
     <header style={{
+      display: 'block',
+      width: '100%',
+      boxSizing: 'border-box',
       background: 'linear-gradient(160deg, #0f172a 0%, #1e293b 100%)',
       paddingTop: 'calc(env(safe-area-inset-top, 0px) + 20px)',
       paddingBottom: '28px',

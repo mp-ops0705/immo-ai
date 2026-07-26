@@ -553,7 +553,7 @@ export default function OutilsPage() {
   const offreSectionTitleStyle = { margin: '0 0 12px', fontSize: '12px', fontWeight: 800, color: '#64748b', letterSpacing: '0.06em', textTransform: 'uppercase' } as const;
 
   return (
-    <main style={{ minHeight: '100vh', backgroundColor: '#f8fafc', overflowX: 'hidden' }}>
+    <main style={{ display: 'block', width: '100%', boxSizing: 'border-box', minHeight: '100vh', backgroundColor: '#f8fafc', overflowX: 'hidden' }}>
       <style>{`@keyframes cfSlideUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }`}</style>
       <PageHeader
         eyebrow="Outils"
