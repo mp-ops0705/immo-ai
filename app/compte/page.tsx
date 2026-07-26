@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { PageHeader } from '@/app/components/PageHeader';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 
@@ -123,16 +124,13 @@ export default function ComptePage() {
   if (isLoading) return <main style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #e8edf5 0%, #f8fafc 260px, #f8fafc 100%)' }} />;
 
   return (
-    <main style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #e8edf5 0%, #f8fafc 260px, #f8fafc 100%)', padding: '12px' }}>
-      <section style={{ width: '100%', maxWidth: '430px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 90px)' }}>
-
-        <header style={{ padding: '20px 24px', borderRadius: '0', background: 'linear-gradient(145deg, #0f172a 0%, #1e293b 100%)', color: '#ffffff', boxShadow: 'none', position: 'relative', overflow: 'hidden', width: '100vw', marginLeft: 'calc(-50vw + 50%)', marginRight: 'calc(-50vw + 50%)', marginTop: '-12px' }}>
-          <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '160px', height: '160px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(251,191,36,0.15) 0%, transparent 65%)', pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', bottom: '-20px', left: '20px', width: '90px', height: '90px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(251,191,36,0.07) 0%, transparent 65%)', pointerEvents: 'none' }} />
-          <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Mon compte</div>
-          <h1 style={{ margin: '6px 0 0', fontSize: '24px', fontWeight: 900, letterSpacing: '-0.02em' }}>Profil & parametres</h1>
-          <p style={{ margin: '5px 0 0', fontSize: '13px', color: '#64748b', lineHeight: 1.5 }}>{email}</p>
-        </header>
+    <main style={{ minHeight: '100vh', backgroundColor: '#f8fafc', overflowX: 'hidden' }}>
+      <PageHeader
+        eyebrow="Mon compte"
+        title="Profil & paramètres"
+        subtitle={email}
+      />
+      <section style={{ maxWidth: '430px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingTop: '20px', paddingLeft: '16px', paddingRight: '16px', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 90px)', overflowWrap: 'break-word' }}>
 
         {/* Actions compte */}
         <div style={cardStyle}>

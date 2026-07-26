@@ -1,6 +1,7 @@
 'use client';
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { PageHeader } from '@/app/components/PageHeader';
 import { PDFDownloadLink, Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 import { supabase } from '@/lib/supabase/client';
 
@@ -552,43 +553,37 @@ export default function OutilsPage() {
   const offreSectionTitleStyle = { margin: '0 0 12px', fontSize: '12px', fontWeight: 800, color: '#64748b', letterSpacing: '0.06em', textTransform: 'uppercase' } as const;
 
   return (
-    <main style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #e8edf5 0%, #f8fafc 260px, #f8fafc 100%)', padding: '12px' }}>
+    <main style={{ minHeight: '100vh', backgroundColor: '#f8fafc', overflowX: 'hidden' }}>
       <style>{`@keyframes cfSlideUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }`}</style>
-      <section style={{ width: '100%', maxWidth: '430px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 90px)' }}>
-
-        {/* PAGE HEADER */}
-        <header style={{ padding: '20px 24px', borderRadius: '0', background: 'linear-gradient(145deg, #0f172a 0%, #1e293b 100%)', color: '#ffffff', boxShadow: 'none', position: 'relative', overflow: 'hidden', width: '100vw', marginLeft: 'calc(-50vw + 50%)', marginRight: 'calc(-50vw + 50%)', marginTop: '-12px' }}>
-          <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '160px', height: '160px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(251,191,36,0.15) 0%, transparent 65%)', pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', bottom: '-20px', left: '20px', width: '90px', height: '90px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(251,191,36,0.07) 0%, transparent 65%)', pointerEvents: 'none' }} />
-          <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Outils</div>
-          <h1 style={{ margin: '6px 0 0', fontSize: '24px', fontWeight: 900, letterSpacing: '-0.02em' }}>Outils & calculateurs</h1>
-          <p style={{ margin: '5px 0 0', fontSize: '13px', color: '#64748b', lineHeight: 1.5 }}>Capacite d&apos;emprunt, copropriete, offre d&apos;achat — tout au meme endroit.</p>
-        </header>
+      <PageHeader
+        eyebrow="Outils"
+        title="Outils & calculateurs"
+        subtitle="Capacité d'emprunt, copropriété, offre d'achat — tout au même endroit."
+      />
+      <section style={{ maxWidth: '430px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingTop: '20px', paddingLeft: '16px', paddingRight: '16px', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 90px)', overflowWrap: 'break-word' }}>
 
         {/* ── CARD 1 — CAPACITE D'EMPRUNT — accent ambre ── */}
         <div style={{ borderRadius: '20px', overflow: 'hidden', boxShadow: '0 4px 20px rgba(15,23,42,0.14)' }}>
           <button
             type="button"
             onClick={() => setOpenCapacite(o => !o)}
-            style={{ width: '100%', padding: '20px', background: 'linear-gradient(135deg, #0f172a 0%, #1c2d4a 100%)', border: 'none', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', overflow: 'hidden' }}
+            style={{ width: '100%', padding: '20px', background: 'linear-gradient(135deg, #0f172a 0%, #1c2d4a 100%)', border: 'none', cursor: 'pointer', textAlign: 'left', display: 'grid', gridTemplateColumns: '48px minmax(0, 1fr) auto', columnGap: '16px', rowGap: '4px', alignItems: 'start', position: 'relative', overflow: 'hidden' }}
           >
             <div style={{ position: 'absolute', top: '-24px', right: '-24px', width: '96px', height: '96px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(251,191,36,0.18) 0%, transparent 70%)', pointerEvents: 'none' }} />
             <div style={{ position: 'absolute', bottom: '-16px', right: '64px', width: '48px', height: '48px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(251,191,36,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
-            <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'linear-gradient(135deg, rgba(251,191,36,0.22) 0%, rgba(251,191,36,0.08) 100%)', border: '1px solid rgba(251,191,36,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{ gridColumn: '1', gridRow: '1 / span 2', alignSelf: 'center', width: '48px', height: '48px', borderRadius: '14px', background: 'linear-gradient(135deg, rgba(251,191,36,0.22) 0%, rgba(251,191,36,0.08) 100%)', border: '1px solid rgba(251,191,36,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1 }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <div style={{ flex: 1, zIndex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                <span style={{ fontSize: '16px', fontWeight: 850, color: '#ffffff', letterSpacing: '-0.01em' }}>Capacite d&apos;emprunt</span>
-                <span style={{ padding: '2px 8px', borderRadius: '999px', backgroundColor: 'rgba(251,191,36,0.15)', border: '1px solid rgba(251,191,36,0.25)', color: '#fbbf24', fontSize: '10px', fontWeight: 800, letterSpacing: '0.04em' }}>CALCUL</span>
-              </div>
-              <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.45)', fontWeight: 500 }}>Combien puis-je emprunter ?</div>
+            <div style={{ gridColumn: '2', gridRow: '1', zIndex: 1, fontSize: '16px', fontWeight: 850, color: '#ffffff', letterSpacing: '-0.01em', minWidth: 0, overflowWrap: 'break-word' }}>Capacite d&apos;emprunt</div>
+            <div style={{ gridColumn: '3', gridRow: '1', display: 'flex', alignItems: 'center', gap: '8px', zIndex: 1 }}>
+              <span style={{ padding: '2px 8px', borderRadius: '999px', backgroundColor: 'rgba(251,191,36,0.15)', border: '1px solid rgba(251,191,36,0.25)', color: '#fbbf24', fontSize: '10px', fontWeight: 800, letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>CALCUL</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transform: openCapacite ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.22s ease' }}>
+                <path d="M19 9l-7 7-7-7" />
+              </svg>
             </div>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transform: openCapacite ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.22s ease', zIndex: 1 }}>
-              <path d="M19 9l-7 7-7-7" />
-            </svg>
+            <div style={{ gridColumn: '2 / -1', gridRow: '2', zIndex: 1, fontSize: '12px', color: 'rgba(255,255,255,0.45)', fontWeight: 500, minWidth: 0, overflowWrap: 'break-word' }}>Combien puis-je emprunter ?</div>
           </button>
 
           {openCapacite && (
@@ -707,25 +702,23 @@ export default function OutilsPage() {
           <button
             type="button"
             onClick={() => setOpenCopro(o => !o)}
-            style={{ width: '100%', padding: '20px', background: 'linear-gradient(135deg, #0f172a 0%, #1a1f35 100%)', border: 'none', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', overflow: 'hidden' }}
+            style={{ width: '100%', padding: '20px', background: 'linear-gradient(135deg, #0f172a 0%, #1a1f35 100%)', border: 'none', cursor: 'pointer', textAlign: 'left', display: 'grid', gridTemplateColumns: '48px minmax(0, 1fr) auto', columnGap: '16px', rowGap: '4px', alignItems: 'start', position: 'relative', overflow: 'hidden' }}
           >
             <div style={{ position: 'absolute', top: '-24px', right: '-24px', width: '96px', height: '96px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(129,140,248,0.18) 0%, transparent 70%)', pointerEvents: 'none' }} />
             <div style={{ position: 'absolute', bottom: '-16px', right: '64px', width: '48px', height: '48px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(129,140,248,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
-            <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'linear-gradient(135deg, rgba(129,140,248,0.22) 0%, rgba(129,140,248,0.08) 100%)', border: '1px solid rgba(129,140,248,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{ gridColumn: '1', gridRow: '1 / span 2', alignSelf: 'center', width: '48px', height: '48px', borderRadius: '14px', background: 'linear-gradient(135deg, rgba(129,140,248,0.22) 0%, rgba(129,140,248,0.08) 100%)', border: '1px solid rgba(129,140,248,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1 }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
             </div>
-            <div style={{ flex: 1, zIndex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                <span style={{ fontSize: '16px', fontWeight: 850, color: '#ffffff', letterSpacing: '-0.01em' }}>Analyse copropriete</span>
-                <span style={{ padding: '2px 8px', borderRadius: '999px', backgroundColor: 'rgba(129,140,248,0.15)', border: '1px solid rgba(129,140,248,0.25)', color: '#a5b4fc', fontSize: '10px', fontWeight: 800, letterSpacing: '0.04em' }}>ANALYSE</span>
-              </div>
-              <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.45)', fontWeight: 500 }}>Travaux, litiges et risques financiers</div>
+            <div style={{ gridColumn: '2', gridRow: '1', zIndex: 1, fontSize: '16px', fontWeight: 850, color: '#ffffff', letterSpacing: '-0.01em', minWidth: 0, overflowWrap: 'break-word' }}>Analyse copropriete</div>
+            <div style={{ gridColumn: '3', gridRow: '1', display: 'flex', alignItems: 'center', gap: '8px', zIndex: 1 }}>
+              <span style={{ padding: '2px 8px', borderRadius: '999px', backgroundColor: 'rgba(129,140,248,0.15)', border: '1px solid rgba(129,140,248,0.25)', color: '#a5b4fc', fontSize: '10px', fontWeight: 800, letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>ANALYSE</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transform: openCopro ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.22s ease' }}>
+                <path d="M19 9l-7 7-7-7" />
+              </svg>
             </div>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transform: openCopro ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.22s ease', zIndex: 1 }}>
-              <path d="M19 9l-7 7-7-7" />
-            </svg>
+            <div style={{ gridColumn: '2 / -1', gridRow: '2', zIndex: 1, fontSize: '12px', color: 'rgba(255,255,255,0.45)', fontWeight: 500, minWidth: 0, overflowWrap: 'break-word' }}>Travaux, litiges et risques financiers</div>
           </button>
 
           {openCopro && (
@@ -833,25 +826,23 @@ export default function OutilsPage() {
           <button
             type="button"
             onClick={() => setOpenOffre(o => !o)}
-            style={{ width: '100%', padding: '20px', background: 'linear-gradient(135deg, #0f172a 0%, #0d2818 100%)', border: 'none', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', overflow: 'hidden' }}
+            style={{ width: '100%', padding: '20px', background: 'linear-gradient(135deg, #0f172a 0%, #0d2818 100%)', border: 'none', cursor: 'pointer', textAlign: 'left', display: 'grid', gridTemplateColumns: '48px minmax(0, 1fr) auto', columnGap: '16px', rowGap: '4px', alignItems: 'start', position: 'relative', overflow: 'hidden' }}
           >
             <div style={{ position: 'absolute', top: '-24px', right: '-24px', width: '96px', height: '96px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(52,211,153,0.18) 0%, transparent 70%)', pointerEvents: 'none' }} />
             <div style={{ position: 'absolute', bottom: '-16px', right: '64px', width: '48px', height: '48px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(52,211,153,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
-            <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'linear-gradient(135deg, rgba(52,211,153,0.22) 0%, rgba(52,211,153,0.08) 100%)', border: '1px solid rgba(52,211,153,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{ gridColumn: '1', gridRow: '1 / span 2', alignSelf: 'center', width: '48px', height: '48px', borderRadius: '14px', background: 'linear-gradient(135deg, rgba(52,211,153,0.22) 0%, rgba(52,211,153,0.08) 100%)', border: '1px solid rgba(52,211,153,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1 }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <div style={{ flex: 1, zIndex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                <span style={{ fontSize: '16px', fontWeight: 850, color: '#ffffff', letterSpacing: '-0.01em' }}>Offre d&apos;achat</span>
-                <span style={{ padding: '2px 8px', borderRadius: '999px', backgroundColor: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', fontSize: '10px', fontWeight: 800, letterSpacing: '0.04em' }}>PDF</span>
-              </div>
-              <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.45)', fontWeight: 500 }}>Genere une offre officielle a envoyer au vendeur</div>
+            <div style={{ gridColumn: '2', gridRow: '1', zIndex: 1, fontSize: '16px', fontWeight: 850, color: '#ffffff', letterSpacing: '-0.01em', minWidth: 0, overflowWrap: 'break-word' }}>Offre d&apos;achat</div>
+            <div style={{ gridColumn: '3', gridRow: '1', display: 'flex', alignItems: 'center', gap: '8px', zIndex: 1 }}>
+              <span style={{ padding: '2px 8px', borderRadius: '999px', backgroundColor: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', fontSize: '10px', fontWeight: 800, letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>PDF</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transform: openOffre ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.22s ease' }}>
+                <path d="M19 9l-7 7-7-7" />
+              </svg>
             </div>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transform: openOffre ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.22s ease', zIndex: 1 }}>
-              <path d="M19 9l-7 7-7-7" />
-            </svg>
+            <div style={{ gridColumn: '2 / -1', gridRow: '2', zIndex: 1, fontSize: '12px', color: 'rgba(255,255,255,0.45)', fontWeight: 500, minWidth: 0, overflowWrap: 'break-word' }}>Genere une offre officielle a envoyer au vendeur</div>
           </button>
 
           {openOffre && (

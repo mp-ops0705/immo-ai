@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: "Immo-AI",
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
   },
   icons: {
     apple: "/apple-touch-icon.png",

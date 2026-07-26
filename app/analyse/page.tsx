@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { FormEvent, useEffect, useRef, useState } from 'react';
+import { PageHeader } from '@/app/components/PageHeader';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 
@@ -1210,24 +1211,13 @@ export default function AnalysePage() {
   }
 
   return (
-    <main
-      style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(180deg, #e8edf5 0%, #f8fafc 260px, #f8fafc 100%)',
-        padding: '12px',
-      }}
-    >
-      <section
-        style={{
-          width: '100%',
-          maxWidth: '430px',
-          margin: '0 auto',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '12px',
-          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 90px)',
-        }}
-      >
+    <main style={{ minHeight: '100vh', backgroundColor: '#f8fafc', overflowX: 'hidden' }}>
+      <PageHeader
+        eyebrow="Analyse"
+        title="Analyser un bien locatif"
+        subtitle="Calculez le rendement, le cashflow et la rentabilité avant d'acheter."
+      />
+      <section style={{ maxWidth: '430px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingTop: '20px', paddingLeft: '16px', paddingRight: '16px', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 90px)', overflowWrap: 'break-word' }}>
         <style>{`
           @keyframes cfSlideUp {
             from { opacity: 0; transform: translateY(22px); }
@@ -1244,13 +1234,6 @@ export default function AnalysePage() {
           .sk-dark  { background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.06) 75%); background-size: 800px 100%; animation: shimmer 1.6s infinite linear; border-radius: 6px; }
           .sk-light { background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%); background-size: 800px 100%; animation: shimmer 1.6s infinite linear; border-radius: 6px; }
         `}</style>
-<header style={{ padding: '20px 24px', borderRadius: '0', background: 'linear-gradient(145deg, #0f172a 0%, #1e293b 100%)', color: '#ffffff', boxShadow: 'none', position: 'relative', overflow: 'hidden', width: '100vw', marginLeft: 'calc(-50vw + 50%)', marginRight: 'calc(-50vw + 50%)', marginTop: '-12px' }}>
-          <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '160px', height: '160px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(251,191,36,0.15) 0%, transparent 65%)', pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', bottom: '-20px', left: '20px', width: '90px', height: '90px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(251,191,36,0.07) 0%, transparent 65%)', pointerEvents: 'none' }} />
-          <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Analyse</div>
-          <h1 style={{ margin: '6px 0 0', fontSize: '24px', fontWeight: 900, letterSpacing: '-0.02em' }}>Analyser un bien locatif</h1>
-          <p style={{ margin: '5px 0 0', fontSize: '13px', color: '#64748b', lineHeight: 1.5 }}>Calculez le rendement, le cashflow et la rentabilité avant d'acheter.</p>
-        </header>
 
         {isAnalysing && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', animation: 'cfFadeIn 0.3s ease both' }}>
