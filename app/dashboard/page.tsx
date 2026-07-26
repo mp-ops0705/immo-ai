@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/app/components/PageHeader';
 import { supabase } from '@/lib/supabase/client';
@@ -403,6 +403,13 @@ function PropertyModal({ property: p, onClose }: { property: Property; onClose: 
   );
 }
 
+const quickActions = [
+  { href: '/analyse', label: 'Analyser un bien', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', color: '#6366f1' },
+  { href: '/dashboard/ajouter', label: 'Ajouter un bien', icon: 'M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2zM9 22V12h6v10', color: '#3b82f6' },
+  { href: '/mes-analyses', label: 'Mes analyses', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', color: '#8b5cf6' },
+  { href: '/outils?open=capacite', label: "Capacité d'emprunt", icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', color: '#06b6d4' },
+];
+
 // ── Main dashboard ─────────────────────────────────────────────────────────────
 export default function DashboardPage() {
   const router = useRouter();
@@ -410,6 +417,11 @@ export default function DashboardPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const carouselInnerRef = useRef<HTMLDivElement>(null);
+  const carouselPos = useRef(0);
+  const carouselInteracting = useRef(false);
+  const carouselDragged = useRef(false);
+  const carouselStartX = useRef(0);
 
   useEffect(() => {
     let isMounted = true;
@@ -435,6 +447,24 @@ export default function DashboardPage() {
     init();
     return () => { isMounted = false; };
   }, [router]);
+
+  useEffect(() => {
+    if (isLoading) return;
+    const inner = carouselInnerRef.current;
+    if (!inner) return;
+    let animId: number;
+    const tick = () => {
+      if (!carouselInteracting.current) {
+        carouselPos.current -= 0.67;
+        const half = inner.scrollWidth / 2;
+        if (-carouselPos.current >= half) carouselPos.current += half;
+      }
+      inner.style.transform = `translateX(${carouselPos.current}px)`;
+      animId = requestAnimationFrame(tick);
+    };
+    animId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(animId);
+  }, [isLoading]);
 
   // KPIs
   const totalValue = properties.reduce((s, p) => s + (p.current_value ?? p.purchase_price ?? 0), 0);
@@ -572,33 +602,52 @@ export default function DashboardPage() {
         {/* ── Actions rapides ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.01em' }}>Actions rapides</h2>
-          <div style={{ overflow: 'hidden', margin: '0 -12px' }}>
-            {(() => {
-              const actions = [
-                { href: '/analyse', label: 'Analyser un bien', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', color: '#6366f1' },
-                { href: '/dashboard/ajouter', label: 'Ajouter un bien', icon: 'M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2zM9 22V12h6v10', color: '#3b82f6' },
-                { href: '/mes-analyses', label: 'Mes analyses', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', color: '#8b5cf6' },
-                { href: '/outils?open=offre', label: "Capacité d'emprunt", icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', color: '#06b6d4' },
-              ];
-              return (
-                <div style={{ display: 'flex', gap: '10px', paddingLeft: '12px', width: 'max-content', animation: 'actionsScroll 14s linear infinite' }}>
-                  {[...actions, ...actions].map((action, i) => (
-                    <Link
-                      key={i}
-                      href={action.href}
-                      style={{ flexShrink: 0, width: '130px', padding: '16px 14px', borderRadius: '16px', backgroundColor: '#ffffff', border: '1px solid rgba(226,232,240,0.9)', borderTop: `3px solid ${action.color}`, display: 'flex', flexDirection: 'column', gap: '12px', textDecoration: 'none', boxShadow: '0 2px 8px rgba(15,23,42,0.07)' }}
-                    >
-                      <div style={{ width: '34px', height: '34px', borderRadius: '10px', backgroundColor: `${action.color}16`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={action.color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-                          <path d={action.icon} />
-                        </svg>
-                      </div>
-                      <span style={{ fontSize: '12px', fontWeight: 800, color: '#0f172a', lineHeight: 1.3 }}>{action.label}</span>
-                    </Link>
-                  ))}
-                </div>
-              );
-            })()}
+          <div
+            style={{ overflow: 'hidden', margin: '0 -12px', cursor: 'grab', userSelect: 'none' }}
+            onPointerDown={(e) => {
+              carouselInteracting.current = true;
+              carouselDragged.current = false;
+              carouselStartX.current = e.clientX;
+              (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
+              e.currentTarget.style.cursor = 'grabbing';
+            }}
+            onPointerMove={(e) => {
+              if (!carouselInteracting.current) return;
+              const dx = e.clientX - carouselStartX.current;
+              if (Math.abs(dx) > 5) carouselDragged.current = true;
+              carouselPos.current += dx;
+              const half = carouselInnerRef.current ? carouselInnerRef.current.scrollWidth / 2 : 0;
+              if (half > 0) {
+                if (-carouselPos.current >= half) carouselPos.current += half;
+                if (carouselPos.current > 0) carouselPos.current -= half;
+              }
+              carouselStartX.current = e.clientX;
+              if (carouselInnerRef.current) carouselInnerRef.current.style.transform = `translateX(${carouselPos.current}px)`;
+            }}
+            onPointerUp={(e) => {
+              carouselInteracting.current = false;
+              e.currentTarget.style.cursor = 'grab';
+            }}
+            onPointerLeave={() => { carouselInteracting.current = false; }}
+            onClickCapture={(e) => { if (carouselDragged.current) { e.preventDefault(); e.stopPropagation(); carouselDragged.current = false; } }}
+          >
+            <div ref={carouselInnerRef} style={{ display: 'flex', gap: '10px', paddingLeft: '12px', width: 'max-content', willChange: 'transform' }}>
+              {[...quickActions, ...quickActions].map((action, i) => (
+                <Link
+                  key={i}
+                  href={action.href}
+                  draggable={false}
+                  style={{ flexShrink: 0, width: '130px', padding: '16px 14px', borderRadius: '16px', backgroundColor: '#ffffff', border: '1px solid rgba(226,232,240,0.9)', borderTop: `3px solid ${action.color}`, display: 'flex', flexDirection: 'column', gap: '12px', textDecoration: 'none', boxShadow: '0 2px 8px rgba(15,23,42,0.07)' }}
+                >
+                  <div style={{ width: '34px', height: '34px', borderRadius: '10px', backgroundColor: `${action.color}16`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={action.color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                      <path d={action.icon} />
+                    </svg>
+                  </div>
+                  <span style={{ fontSize: '12px', fontWeight: 800, color: '#0f172a', lineHeight: 1.3 }}>{action.label}</span>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -619,7 +668,6 @@ export default function DashboardPage() {
         <PropertyModal property={selectedProperty} onClose={() => setSelectedProperty(null)} />
       )}
 
-      <style>{`@keyframes actionsScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }`}</style>
     </main>
   );
 }

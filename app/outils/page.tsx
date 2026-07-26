@@ -396,11 +396,12 @@ export default function OutilsPage() {
   type CalcResult = { capacite: number; budget: number; mensualiteMax: number; endettementActuel: number; revAjuste: number; loyer: number };
   const [calcResult, setCalcResult] = useState<CalcResult | null>(null);
 
-  // ── Auto-open depuis URL (?open=offre) ──
+  // ── Auto-open depuis URL (?open=offre|capacite) ──
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
     if (params.get('open') === 'offre') setOpenOffre(true);
+    if (params.get('open') === 'capacite') setOpenCapacite(true);
   }, []);
 
   // ── Offre effects ──
