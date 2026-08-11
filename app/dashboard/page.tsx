@@ -603,7 +603,7 @@ export default function DashboardPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.01em' }}>Actions rapides</h2>
           <div
-            style={{ overflow: 'hidden', margin: '0 -12px', cursor: 'grab', userSelect: 'none' }}
+            style={{ overflow: 'hidden', margin: '0 -12px', cursor: 'grab', userSelect: 'none', touchAction: 'none' }}
             onPointerDown={(e) => {
               carouselInteracting.current = true;
               carouselDragged.current = false;
