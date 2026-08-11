@@ -417,6 +417,7 @@ export default function DashboardPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const carouselOuterRef = useRef<HTMLDivElement>(null);
   const carouselInnerRef = useRef<HTMLDivElement>(null);
   const carouselPos = useRef(0);
   const carouselInteracting = useRef(false);
@@ -451,7 +452,9 @@ export default function DashboardPage() {
   useEffect(() => {
     if (isLoading) return;
     const inner = carouselInnerRef.current;
-    if (!inner) return;
+    const outer = carouselOuterRef.current;
+    if (!inner || !outer) return;
+
     let animId: number;
     const tick = () => {
       if (!carouselInteracting.current) {
@@ -463,7 +466,35 @@ export default function DashboardPage() {
       animId = requestAnimationFrame(tick);
     };
     animId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(animId);
+
+    const onTouchStart = (e: TouchEvent) => {
+      carouselInteracting.current = true;
+      carouselDragged.current = false;
+      carouselStartX.current = e.touches[0].clientX;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (!carouselInteracting.current) return;
+      e.preventDefault();
+      const dx = e.touches[0].clientX - carouselStartX.current;
+      if (Math.abs(dx) > 5) carouselDragged.current = true;
+      carouselPos.current += dx;
+      const half = inner.scrollWidth / 2;
+      if (-carouselPos.current >= half) carouselPos.current += half;
+      if (carouselPos.current > 0) carouselPos.current -= half;
+      carouselStartX.current = e.touches[0].clientX;
+    };
+    const onTouchEnd = () => { carouselInteracting.current = false; };
+
+    outer.addEventListener('touchstart', onTouchStart, { passive: true });
+    outer.addEventListener('touchmove', onTouchMove, { passive: false });
+    outer.addEventListener('touchend', onTouchEnd, { passive: true });
+
+    return () => {
+      cancelAnimationFrame(animId);
+      outer.removeEventListener('touchstart', onTouchStart);
+      outer.removeEventListener('touchmove', onTouchMove);
+      outer.removeEventListener('touchend', onTouchEnd);
+    };
   }, [isLoading]);
 
   // KPIs
@@ -603,8 +634,10 @@ export default function DashboardPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.01em' }}>Actions rapides</h2>
           <div
-            style={{ overflow: 'hidden', margin: '0 -12px', cursor: 'grab', userSelect: 'none', touchAction: 'none' }}
+            ref={carouselOuterRef}
+            style={{ overflow: 'hidden', margin: '0 -12px', cursor: 'grab', userSelect: 'none' }}
             onPointerDown={(e) => {
+              if (e.pointerType === 'touch') return;
               carouselInteracting.current = true;
               carouselDragged.current = false;
               carouselStartX.current = e.clientX;
@@ -612,7 +645,7 @@ export default function DashboardPage() {
               e.currentTarget.style.cursor = 'grabbing';
             }}
             onPointerMove={(e) => {
-              if (!carouselInteracting.current) return;
+              if (e.pointerType === 'touch' || !carouselInteracting.current) return;
               const dx = e.clientX - carouselStartX.current;
               if (Math.abs(dx) > 5) carouselDragged.current = true;
               carouselPos.current += dx;
@@ -625,10 +658,11 @@ export default function DashboardPage() {
               if (carouselInnerRef.current) carouselInnerRef.current.style.transform = `translateX(${carouselPos.current}px)`;
             }}
             onPointerUp={(e) => {
+              if (e.pointerType === 'touch') return;
               carouselInteracting.current = false;
               e.currentTarget.style.cursor = 'grab';
             }}
-            onPointerLeave={() => { carouselInteracting.current = false; }}
+            onPointerLeave={(e) => { if (e.pointerType !== 'touch') carouselInteracting.current = false; }}
             onClickCapture={(e) => { if (carouselDragged.current) { e.preventDefault(); e.stopPropagation(); carouselDragged.current = false; } }}
           >
             <div ref={carouselInnerRef} style={{ display: 'flex', gap: '10px', paddingLeft: '12px', width: 'max-content', willChange: 'transform' }}>
